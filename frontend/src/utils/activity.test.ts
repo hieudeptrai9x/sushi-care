@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { activityStatus, feedingLabel, pumpSummary, runningLabel } from './activity'
+import { activityStatus, feedingLabel, pumpSummary, runningLabel, usesRecordedDuration } from './activity'
 import type { Activity } from '../types'
 
 const activity = (meta_json?: string): Activity => ({
@@ -50,5 +50,12 @@ describe('runningLabel', () => {
     expect(runningLabel(activity())).toBe('Đang bú')
     expect(runningLabel({ ...activity(), subtype: 'pump' })).toBe('Đang hút sữa')
     expect(runningLabel({ ...activity(), type: 'sleep' })).toBe('Đang ngủ')
+  })
+})
+
+describe('usesRecordedDuration', () => {
+  it('không yêu cầu nhập phút lại sau khi timer đã dừng', () => {
+    expect(usesRecordedDuration(12, 'paused', '2026-06-14T10:15')).toBe(true)
+    expect(usesRecordedDuration(0, 'completed', '')).toBe(false)
   })
 })

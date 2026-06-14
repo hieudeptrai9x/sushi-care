@@ -86,7 +86,7 @@ function startOfDay(date: Date): Date {
 }
 
 export function durationMinutes(start: string, end: string): number {
-  return Math.max(0, Math.round((new Date(end).getTime() - new Date(start).getTime()) / 60_000))
+  return Math.max(0, Math.ceil((new Date(end).getTime() - new Date(start).getTime()) / 60_000))
 }
 
 export function formatDuration(minutes: number): string {

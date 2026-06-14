@@ -19,7 +19,7 @@ if (!$activity) {
     Response::error('Không tìm thấy hoạt động.', 404);
 }
 $end = date('Y-m-d H:i:s');
-$duration = max(0, (int) round((strtotime($end) - strtotime((string) $activity['start_time'])) / 60));
+$duration = \SushiCare\Lib\ActivityService::elapsedMinutes((string) $activity['start_time'], $end);
 $meta = json_decode((string) ($activity['meta_json'] ?? ''), true);
 $meta = is_array($meta) ? $meta : [];
 $meta['status'] = 'paused';

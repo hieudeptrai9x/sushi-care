@@ -29,6 +29,10 @@ export function runningLabel(activity: Activity): string {
   return 'Đang theo dõi'
 }
 
+export function usesRecordedDuration(activityId: number, status: ActivityStatus, end: string): boolean {
+  return activityId > 0 && status !== 'running' && end !== ''
+}
+
 export function activityMeta(activity: Activity): Record<string, unknown> {
   if (!activity.meta_json) return {}
   try {

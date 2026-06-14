@@ -60,6 +60,11 @@ final class ActivityService
         return $result;
     }
 
+    public static function elapsedMinutes(string $start, string $end): int
+    {
+        return max(0, (int) ceil((strtotime($end) - strtotime($start)) / 60));
+    }
+
     private static function dateTime(mixed $value): string
     {
         $timestamp = strtotime((string) $value);

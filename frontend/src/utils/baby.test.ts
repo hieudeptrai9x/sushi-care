@@ -17,6 +17,10 @@ describe('duration helpers', () => {
     expect(durationMinutes('2026-06-14T23:30', '2026-06-15T01:00')).toBe(90)
     expect(formatDuration(90)).toBe('1 giờ 30 phút')
   })
+
+  it('làm tròn lên để timer ngắn vẫn ghi nhận thời lượng', () => {
+    expect(durationMinutes('2026-06-14T10:00:00', '2026-06-14T10:00:10')).toBe(1)
+  })
 })
 
 describe('local date and time fields', () => {

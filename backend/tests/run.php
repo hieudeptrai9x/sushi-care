@@ -51,6 +51,8 @@ $localizedActivity = ActivityService::normalize([
 ]);
 assertSameValue(2.7, $localizedActivity['weight_kg'], 'Normalize cân nặng có dấu phẩy');
 assertSameValue(37.2, $localizedActivity['temperature'], 'Normalize nhiệt độ có dấu phẩy');
+assertSameValue(1, ActivityService::elapsedMinutes('2026-06-14 10:00:00', '2026-06-14 10:00:10'), 'Timer ngắn làm tròn lên một phút');
+assertSameValue(75, ActivityService::elapsedMinutes('2026-06-14 10:00:00', '2026-06-14 11:15:00'), 'Timer tính thời lượng từ mốc bắt đầu và kết thúc');
 
 $summary = ActivityService::summarize([
     ['type' => 'feeding', 'amount_ml' => 120, 'duration_minutes' => 0, 'subtype' => 'formula'],
