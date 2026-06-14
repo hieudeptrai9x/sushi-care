@@ -1,0 +1,14 @@
+{
+  "name": "Sushi Care - Chăm sóc bé",
+  "short_name": "Sushi Care",
+  "description": "Nhật ký chăm sóc bé mỗi ngày",
+  "lang": "vi",
+  "start_url": "/baby-care/",
+  "scope": "/baby-care/",
+  "display": "standalone",
+  "background_color": "#fff7fa",
+  "theme_color": "#ff5f8f",
+  "icons": [
+    { "src": "/baby-care/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }
+  ]
+}

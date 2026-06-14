@@ -1,0 +1,72 @@
+<?php
+
+declare(strict_types=1);
+
+use SushiCare\Config\Database;
+use SushiCare\Lib\Response;
+
+session_name('sushi_care_session');
+session_set_cookie_params([
+    'httponly' => true,
+    'secure' => !empty($_SERVER['HTTPS']),
+    'samesite' => 'Lax',
+    'path' => '/',
+]);
+session_start();
+
+require_once dirname(__DIR__) . '/config/database.php';
+
+spl_autoload_register(function (string $class): void {
+    $prefix = 'SushiCare\\';
+    if (!str_starts_with($class, $prefix)) {
+        return;
+    }
+    $relative = str_replace('\\', '/', substr($class, strlen($prefix)));
+    $base = dirname(__DIR__);
+    $path = $base . '/' . lcfirst($relative) . '.php';
+    if (is_file($path)) {
+        require_once $path;
+    }
+});
+
+$config = require dirname(__DIR__) . '/config/app.php';
+
+set_exception_handler(function (Throwable $error) use ($config): void {
+    error_log($error->getMessage());
+    $message = $config['env'] === 'development' ? $error->getMessage() : 'Có lỗi xảy ra. Vui lòng thử lại.';
+    Response::error($message, $error instanceof InvalidArgumentException ? 422 : 500);
+});
+
+function db(): PDO
+{
+    global $config;
+    return Database::connection($config);
+}
+
+function input(): array
+{
+    $type = $_SERVER['CONTENT_TYPE'] ?? '';
+    if (str_contains($type, 'application/json')) {
+        $data = json_decode((string) file_get_contents('php://input'), true);
+        return is_array($data) ? $data : [];
+    }
+    return $_POST;
+}
+
+function require_method(string $method): void
+{
+    if (($_SERVER['REQUEST_METHOD'] ?? 'GET') !== $method) {
+        Response::error('Phương thức không được hỗ trợ.', 405);
+    }
+}
+
+function baby_id(int $userId): int
+{
+    $stmt = db()->prepare('SELECT id FROM babies WHERE user_id = ? ORDER BY id LIMIT 1');
+    $stmt->execute([$userId]);
+    $id = (int) $stmt->fetchColumn();
+    if ($id < 1) {
+        throw new RuntimeException('Chưa có hồ sơ bé.');
+    }
+    return $id;
+}
