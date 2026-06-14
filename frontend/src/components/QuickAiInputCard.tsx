@@ -6,6 +6,7 @@ import { quickAiService, type QuickActivity, type QuickParseResult } from '../se
 import { AiClarificationSheet } from './AiClarificationSheet'
 import { AiParseConfirmSheet } from './AiParseConfirmSheet'
 import { AnimatedPlaceholder, quickAiExamples } from './AnimatedPlaceholder'
+import { appendClarification } from '../utils/quickAiInput'
 
 export function QuickAiInputCard({ babyId, onSaved }: { babyId: number; onSaved: () => Promise<unknown> }) {
   const navigate = useNavigate()
@@ -16,17 +17,28 @@ export function QuickAiInputCard({ babyId, onSaved }: { babyId: number; onSaved:
   const [examplesOpen, setExamplesOpen] = useState(false)
   const [result, setResult] = useState<QuickParseResult | null>(null)
 
-  const submit = async (event: FormEvent) => {
-    event.preventDefault()
-    if (!text.trim()) return
+  const parse = async (input: string) => {
+    if (!input.trim()) return
     setLoading(true)
+    setResult(null)
     try {
-      setResult(await quickAiService.parseQuickInput(text.trim(), babyId))
+      setResult(await quickAiService.parseQuickInput(input.trim(), babyId))
     } catch {
       toast('AI đang hơi bận, anh thử lại sau nhé.')
     } finally {
       setLoading(false)
     }
+  }
+
+  const submit = (event: FormEvent) => {
+    event.preventDefault()
+    void parse(text)
+  }
+
+  const clarify = (suggestion: string) => {
+    const clarifiedText = appendClarification(text, suggestion)
+    setText(clarifiedText)
+    void parse(clarifiedText)
   }
 
   const save = async () => {
@@ -76,7 +88,7 @@ export function QuickAiInputCard({ babyId, onSaved }: { babyId: number; onSaved:
       {examplesOpen && <div className="quick-ai-examples">{quickAiExamples.map((example) => <button key={example} onClick={() => { setText(example); setExamplesOpen(false) }}>{example}</button>)}</div>}
     </section>
     {result?.success && result.activity && <AiParseConfirmSheet activity={result.activity} summary={result.human_summary} warning={result.warning} saving={saving} onSave={save} onEdit={edit} onCancel={() => setResult(null)} />}
-    {result?.needs_clarification && <AiClarificationSheet question={result.question ?? 'Anh bổ sung thêm chút nhé.'} suggestions={result.suggestions ?? []} onSuggestion={(suggestion) => { setText((current) => `${current} ${suggestion}`.trim()); setResult(null) }} onCancel={() => setResult(null)} onManual={manual} />}
+    {result?.needs_clarification && <AiClarificationSheet question={result.question ?? 'Anh bổ sung thêm chút nhé.'} suggestions={result.suggestions ?? []} onSuggestion={clarify} onCancel={() => setResult(null)} onManual={manual} />}
   </>
 }
 
