@@ -17,67 +17,37 @@ export function calculateAge(birthDate: string, now = new Date()): string {
 
 export type FeedingGuidance = {
   bottleAmount: string
+  dailyAmount: string
   bottleCadence: string
   breastfeedingCadence: string
   note: string
   source: string
 }
 
-export function feedingGuidance(birthDate: string, now = new Date()): FeedingGuidance {
+export function feedingGuidance(birthDate: string, now = new Date(), weightKg?: number): FeedingGuidance {
   const birth = new Date(`${birthDate}T00:00:00`)
   const days = Math.max(0, Math.floor((startOfDay(now).getTime() - birth.getTime()) / DAY))
-
-  if (days <= 2) {
+  const breastfeedingCadence = days < 45 ? '8–12 cữ/24 giờ' : 'theo nhu cầu của bé'
+  if (weightKg && weightKg > 0) {
+    const daily = Math.round(weightKg * 150)
+    const lowPerFeed = Math.round(daily / 12)
+    const highPerFeed = Math.round(daily / 8)
     return {
-      bottleAmount: '30–60 ml/cữ',
-      bottleCadence: 'theo tín hiệu đói, thường 8–12 cữ/ngày',
-      breastfeedingCadence: '8–12 cữ/24 giờ',
-      note: 'Lượng bú bình tham khảo trong 2–3 ngày đầu; không dùng ml để đánh giá một cữ bú mẹ trực tiếp.',
-      source: 'AAP · CDC',
-    }
-  }
-  if (days < 21) {
-    return {
-      bottleAmount: '60–90 ml/cữ',
-      bottleCadence: 'thường mỗi 3–4 giờ',
-      breastfeedingCadence: '8–12 cữ/24 giờ',
-      note: 'Lượng bú bình là mốc tham khảo sau vài ngày đầu; bú mẹ trực tiếp đánh giá bằng dấu hiệu nuốt, tã và tăng cân.',
-      source: 'AAP · CDC',
-    }
-  }
-  if (days < 45) {
-    return {
-      bottleAmount: '90–120 ml/cữ',
-      bottleCadence: 'thường mỗi 3–4 giờ',
-      breastfeedingCadence: '8–12 cữ/24 giờ',
-      note: 'Mốc bú bình tham khảo gần cuối tháng đầu; không cần ép bé bú hết.',
-      source: 'AAP · CDC',
-    }
-  }
-  if (days < 165) {
-    return {
-      bottleAmount: 'Tăng dần theo nhu cầu',
-      bottleCadence: 'thường mỗi 3–4 giờ',
-      breastfeedingCadence: 'theo nhu cầu của bé',
-      note: 'Theo dõi tăng trưởng, tã ướt và tín hiệu đói/no để điều chỉnh.',
-      source: 'AAP · CDC',
-    }
-  }
-  if (days < 210) {
-    return {
-      bottleAmount: '180–240 ml/cữ',
-      bottleCadence: 'khoảng 4–5 cữ/ngày',
-      breastfeedingCadence: 'theo nhu cầu của bé',
-      note: 'Mốc tham khảo quanh 6 tháng; nhu cầu từng bé có thể khác.',
-      source: 'AAP · CDC',
+      bottleAmount: `khoảng ${lowPerFeed}–${highPerFeed} ml/cữ`,
+      dailyAmount: `khoảng ${daily} ml/24 giờ`,
+      bottleCadence: 'nếu chia 8–12 cữ/ngày',
+      breastfeedingCadence,
+      note: 'Ước tính theo cân nặng hiện tại; theo tín hiệu đói/no, tã ướt và tăng cân, không ép bé bú hết.',
+      source: 'BV Từ Dũ · BV Nhi Đồng 1',
     }
   }
   return {
-    bottleAmount: 'Theo nhu cầu của bé',
-    bottleCadence: 'kết hợp lịch ăn dặm',
-    breastfeedingCadence: 'theo nhu cầu của bé',
-    note: 'Sữa mẹ hoặc sữa công thức vẫn quan trọng trong năm đầu đời.',
-    source: 'AAP · CDC',
+    bottleAmount: 'Cần cân nặng hiện tại',
+    dailyAmount: 'Ghi cân nặng để tính theo 150 ml/kg/24 giờ',
+    bottleCadence: 'theo nhu cầu của bé',
+    breastfeedingCadence,
+    note: 'Không dùng bảng tuổi cứng khi chưa có cân nặng để cá thể hóa.',
+    source: 'BV Từ Dũ · BV Nhi Đồng 1',
   }
 }
 

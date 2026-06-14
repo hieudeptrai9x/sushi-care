@@ -42,15 +42,16 @@ export function HomePage() {
   }
 
   if (loading) return <div className="page-pad"><Loading cards={5} /></div>
-  const milkGuide = baby ? feedingGuidance(baby.birth_date) : null
+  const currentWeight = stats?.weight.current ?? baby?.birth_weight
+  const milkGuide = baby ? feedingGuidance(baby.birth_date, new Date(), currentWeight ?? undefined) : null
   return <>
     <header className="home-hero">
       <div className="home-top"><div className="baby-avatar">{baby?.avatar_url ? <img src={baby.avatar_url} /> : '🍣'}</div><div><small>Chào buổi sáng</small><h1>{baby?.name ?? 'Bé Sushi'}</h1><p>{baby ? calculateAge(baby.birth_date) : ''}</p></div><button className="icon-button glass notification-button" onClick={() => navigate('/reminders')} aria-label="Mở nhắc nhở"><Bell />{reminders.some((item) => !item.is_done) && <i />}</button></div>
       {milkGuide && <div className="feeding-guide">
         <div className="feeding-guide-icon"><Milk /></div>
-        <div><small>ĐỘ TUỔI NÀY {baby?.name.toUpperCase()} CẦN BÚ</small><strong>{milkGuide.bottleAmount}</strong><span>Bú bình · {milkGuide.bottleCadence}</span></div>
-        <a className="feeding-source" href="https://www.healthychildren.org/English/ages-stages/baby/feeding-nutrition/Pages/Bottle-Feeding-How-Its-Done.aspx" target="_blank" rel="noreferrer" aria-label="Xem nguồn hướng dẫn của AAP"><Info /></a>
-        <p><b>Bú mẹ trực tiếp:</b> {milkGuide.breastfeedingCadence}, không quy đổi chính xác thành ml. {milkGuide.note} Nguồn {milkGuide.source}.</p>
+        <div><small>THEO CÂN NẶNG {currentWeight ? `${currentWeight} KG` : 'HIỆN TẠI'}</small><strong>{baby?.name}: {milkGuide.bottleAmount}</strong><span>{milkGuide.dailyAmount} · {milkGuide.bottleCadence}</span></div>
+        <a className="feeding-source" href="https://tudu.com.vn/vn/suc-khoe-cua-be/bao-nhieu-sua-hang-ngay-thi-du-cho-be/" target="_blank" rel="noreferrer" aria-label="Xem nguồn hướng dẫn của Bệnh viện Từ Dũ"><Info /></a>
+        <p><b>Áp dụng khi bú bình</b> bằng sữa mẹ vắt ra hoặc sữa công thức. <b>Bú mẹ trực tiếp:</b> {milkGuide.breastfeedingCadence}, không quy đổi chính xác thành ml. {milkGuide.note} Nguồn {milkGuide.source}.</p>
       </div>}
     </header>
     <div className="page-pad home-body">

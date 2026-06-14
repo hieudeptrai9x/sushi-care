@@ -31,19 +31,20 @@ describe('local date and time fields', () => {
 })
 
 describe('feedingGuidance', () => {
-  it('tách bú mẹ trực tiếp khỏi lượng sữa bú bình', () => {
-    expect(feedingGuidance('2026-06-11', new Date('2026-06-14T12:00:00'))).toMatchObject({
-      bottleAmount: '60–90 ml/cữ',
+  it('tính lượng bú bình theo cân nặng từ hướng dẫn Việt Nam', () => {
+    expect(feedingGuidance('2026-06-09', new Date('2026-06-14T12:00:00'), 2.7)).toMatchObject({
+      bottleAmount: 'khoảng 34–51 ml/cữ',
+      dailyAmount: 'khoảng 405 ml/24 giờ',
       breastfeedingCadence: '8–12 cữ/24 giờ',
+      source: 'BV Từ Dũ · BV Nhi Đồng 1',
     })
   })
 
-  it('hướng dẫn 90-120 ml khi gần hết tháng đầu', () => {
-    expect(feedingGuidance('2026-05-16', new Date('2026-06-14T12:00:00')).bottleAmount).toBe('90–120 ml/cữ')
-  })
-
-  it('hướng dẫn 180-240 ml khi bé khoảng 6 tháng', () => {
-    expect(feedingGuidance('2025-12-14', new Date('2026-06-14T12:00:00')).bottleAmount).toBe('180–240 ml/cữ')
+  it('không đưa ra ml cá nhân hóa khi chưa có cân nặng', () => {
+    expect(feedingGuidance('2026-06-09', new Date('2026-06-14T12:00:00'))).toMatchObject({
+      bottleAmount: 'Cần cân nặng hiện tại',
+      dailyAmount: 'Ghi cân nặng để tính theo 150 ml/kg/24 giờ',
+    })
   })
 })
 
