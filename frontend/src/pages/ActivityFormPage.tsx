@@ -1,7 +1,9 @@
 import { ArrowLeft, Baby, MoonStar, StickyNote } from 'lucide-react'
-import { useMemo, useState, type FormEvent } from 'react'
-import { useNavigate, useParams } from 'react-router-dom'
+import { useEffect, useMemo, useState, type FormEvent } from 'react'
+import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
+import { DateTimeInput } from '../components/DateTimeInput'
 import { api } from '../services/api'
+import type { Activity } from '../types'
 import { durationMinutes, toLocalInput } from '../utils/baby'
 import { useToast } from '../context/ToastContext'
 
@@ -14,14 +16,18 @@ const config = {
 
 export function ActivityFormPage() {
   const { type = 'feeding' } = useParams()
+  const [searchParams] = useSearchParams()
+  const activityId = Number(searchParams.get('activity') || 0)
   const navigate = useNavigate()
   const toast = useToast()
   const current = config[type as keyof typeof config] ?? config.feeding
   const Icon = current.icon
-  const [subtype, setSubtype] = useState(type === 'feeding' ? 'breast' : type === 'diaper' ? 'wet' : '')
+  const [subtype, setSubtype] = useState(type === 'feeding' ? 'breast_direct' : type === 'diaper' ? 'wet' : '')
   const [start, setStart] = useState(toLocalInput())
   const [end, setEnd] = useState('')
   const [amount, setAmount] = useState('')
+  const [leftAmount, setLeftAmount] = useState('')
+  const [rightAmount, setRightAmount] = useState('')
   const [minutes, setMinutes] = useState('')
   const [side, setSide] = useState('both')
   const [wetLevel, setWetLevel] = useState('medium')
@@ -31,14 +37,36 @@ export function ActivityFormPage() {
   const [busy, setBusy] = useState(false)
   const duration = useMemo(() => end ? durationMinutes(start, end) : Number(minutes || 0), [start, end, minutes])
 
+  useEffect(() => {
+    if (!activityId) return
+    api.get<Activity>(`/api/activities/get.php?id=${activityId}`).then((activity) => {
+      setSubtype(activity.subtype || (type === 'feeding' ? 'breast_direct' : ''))
+      setStart(activity.start_time.replace(' ', 'T').slice(0, 16))
+      setEnd(activity.end_time ? activity.end_time.replace(' ', 'T').slice(0, 16) : toLocalInput())
+      setAmount(activity.amount_ml ? String(activity.amount_ml) : '')
+      try {
+        const meta = typeof activity.meta_json === 'string' ? JSON.parse(activity.meta_json) : activity.meta_json
+        setLeftAmount(meta?.left_ml ? String(meta.left_ml) : '')
+        setRightAmount(meta?.right_ml ? String(meta.right_ml) : '')
+      } catch { /* Ignore malformed legacy metadata. */ }
+      setMinutes(activity.duration_minutes ? String(activity.duration_minutes) : '')
+      setSide(activity.side || 'both')
+      setNote(activity.note || '')
+    }).catch((error) => toast(error instanceof Error ? error.message : 'Không tải được hoạt động.'))
+  }, [activityId, toast, type])
+
   const submit = async (event: FormEvent) => {
     event.preventDefault(); setBusy(true)
     try {
-      await api.post('/api/activities/create.php', {
+      const pumpTotal = Number(leftAmount || 0) + Number(rightAmount || 0)
+      const payload = {
+        id: activityId || undefined,
         type, subtype: subtype || undefined, start_time: start, end_time: end || undefined,
-        duration_minutes: duration, amount_ml: amount || undefined, side, wet_level: wetLevel,
+        duration_minutes: duration, amount_ml: subtype === 'pump' ? pumpTotal : amount || undefined, side, wet_level: wetLevel,
         poop_color: poopColor, poop_texture: poopTexture, note,
-      })
+        meta: { status: 'completed', ...(subtype === 'pump' ? { left_ml: Number(leftAmount || 0), right_ml: Number(rightAmount || 0) } : {}) },
+      }
+      await api.post(activityId ? '/api/activities/update.php' : '/api/activities/create.php', payload)
       toast('Đã lưu vào nhật ký của bé')
       navigate('/')
     } catch (error) { toast(error instanceof Error ? error.message : 'Không thể lưu.') } finally { setBusy(false) }
@@ -48,20 +76,26 @@ export function ActivityFormPage() {
     <header className="form-header"><button className="icon-button" onClick={() => navigate(-1)}><ArrowLeft /></button><div className="form-illustration"><Icon /></div><div><small>GHI NHANH</small><h1>{current.title}</h1></div></header>
     <form className="card entry-form" onSubmit={submit}>
       {type === 'feeding' && <>
-        <Segment value={subtype} onChange={setSubtype} items={[['breast', 'Bú mẹ'], ['formula', 'Sữa công thức'], ['pump', 'Hút sữa']]} />
-        {subtype === 'formula' && <Field label="Lượng sữa (ml)"><input type="number" min="1" max="1000" value={amount} onChange={(e) => setAmount(e.target.value)} required /></Field>}
-        {subtype !== 'formula' && <><Field label="Bên bú / hút"><select value={side} onChange={(e) => setSide(e.target.value)}><option value="left">Bên trái</option><option value="right">Bên phải</option><option value="both">Cả hai bên</option></select></Field>
-          <Field label={subtype === 'pump' ? 'Tổng lượng hút (ml)' : 'Tổng thời gian (phút)'}><input type="number" min="1" value={subtype === 'pump' ? amount : minutes} onChange={(e) => subtype === 'pump' ? setAmount(e.target.value) : setMinutes(e.target.value)} required /></Field></>}
+        <Segment value={subtype} onChange={setSubtype} items={[['breast_direct', 'Bú trực tiếp'], ['breast_bottle', 'Sữa mẹ bình'], ['formula', 'Sữa công thức'], ['pump', 'Hút sữa']]} />
+        {(subtype === 'formula' || subtype === 'breast_bottle') && <Field label="Lượng bé đã bú (ml)"><input type="number" inputMode="numeric" min="1" max="1000" value={amount} onChange={(e) => setAmount(e.target.value)} required /></Field>}
+        {subtype === 'breast_direct' && <><Field label="Bên bú"><select value={side} onChange={(e) => setSide(e.target.value)}><option value="left">Bên trái</option><option value="right">Bên phải</option><option value="both">Cả hai bên</option></select></Field>
+          <Field label="Tổng thời gian bú (phút)"><input type="number" inputMode="numeric" min="1" value={minutes} onChange={(e) => setMinutes(e.target.value)} required /></Field></>}
+        {subtype === 'breast_bottle' && <div className="feeding-note">Ghi đúng số ml sữa mẹ đã vắt mà bé thực sự bú. Không cần ép bé bú hết bình; tiếp tục theo dõi tín hiệu đói/no, tã ướt và tăng cân.</div>}
+        {subtype === 'pump' && <>
+          <div className="two-cols"><Field label="Bên trái (ml)"><input type="number" inputMode="numeric" min="0" value={leftAmount} onChange={(e) => setLeftAmount(e.target.value)} /></Field><Field label="Bên phải (ml)"><input type="number" inputMode="numeric" min="0" value={rightAmount} onChange={(e) => setRightAmount(e.target.value)} /></Field></div>
+          <Field label="Thời gian hút (phút)"><input type="number" inputMode="numeric" min="1" value={minutes} onChange={(e) => setMinutes(e.target.value)} required /></Field>
+          <div className="duration-chip pump-total">Tổng lượng: <strong>{Number(leftAmount || 0) + Number(rightAmount || 0)} ml</strong></div>
+        </>}
       </>}
       {type === 'diaper' && <>
         <Segment value={subtype} onChange={setSubtype} items={[['wet', 'Tã ướt'], ['dirty', 'Tã bẩn'], ['mixed', 'Tã lẫn']]} />
         <Field label="Mức độ ướt"><select value={wetLevel} onChange={(e) => setWetLevel(e.target.value)}><option value="low">Ít</option><option value="medium">Vừa</option><option value="high">Nhiều</option></select></Field>
         {subtype !== 'wet' && <div className="two-cols"><Field label="Màu phân"><select value={poopColor} onChange={(e) => setPoopColor(e.target.value)}><option value="yellow">Vàng</option><option value="green">Xanh</option><option value="brown">Nâu</option><option value="black">Đen</option><option value="red">Đỏ</option></select></Field><Field label="Kết cấu"><select value={poopTexture} onChange={(e) => setPoopTexture(e.target.value)}><option value="soft">Sệt</option><option value="liquid">Lỏng</option><option value="hard">Cứng</option><option value="mucus">Có nhầy</option></select></Field></div>}
       </>}
-      <Field label={type === 'sleep' ? 'Giờ bắt đầu' : 'Thời gian'}><input type="datetime-local" value={start} onChange={(e) => setStart(e.target.value)} required /></Field>
-      {type === 'sleep' && <><Field label="Giờ thức dậy"><input type="datetime-local" min={start} value={end} onChange={(e) => setEnd(e.target.value)} required /></Field><div className="duration-chip">Tổng thời gian: <strong>{duration} phút</strong></div></>}
+      <Field label={type === 'sleep' ? 'Giờ bắt đầu' : 'Thời gian'}><DateTimeInput value={start} onChange={setStart} required /></Field>
+      {type === 'sleep' && <><Field label="Giờ thức dậy"><DateTimeInput value={end} onChange={setEnd} required /></Field><div className="duration-chip">Tổng thời gian: <strong>{duration} phút</strong></div></>}
       <Field label="Ghi chú"><textarea rows={3} placeholder="Bé có điều gì đặc biệt không?" value={note} onChange={(e) => setNote(e.target.value)} /></Field>
-      <button className="primary-button" disabled={busy}>{busy ? 'Đang lưu...' : 'Lưu nhật ký'}</button>
+      <button className="primary-button" disabled={busy}>{busy ? 'Đang lưu...' : activityId ? 'Hoàn tất nhật ký' : 'Lưu nhật ký'}</button>
     </form>
   </div>
 }

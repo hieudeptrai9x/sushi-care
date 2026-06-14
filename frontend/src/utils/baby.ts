@@ -93,3 +93,12 @@ export function toLocalInput(date = new Date()): string {
   const local = new Date(date.getTime() - date.getTimezoneOffset() * 60_000)
   return local.toISOString().slice(0, 16)
 }
+
+export function splitLocalInput(value: string): { date: string; time: string } {
+  const [date = '', time = ''] = value.split('T')
+  return { date, time: time.slice(0, 5) }
+}
+
+export function combineLocalInput(date: string, time: string): string {
+  return date && time ? `${date}T${time}` : ''
+}

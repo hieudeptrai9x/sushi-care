@@ -1,4 +1,4 @@
-const CACHE = 'sushi-care-v2'
+const CACHE = 'sushi-care-v3'
 const SHELL = [
   '/baby-care/',
   '/baby-care/manifest.webmanifest',

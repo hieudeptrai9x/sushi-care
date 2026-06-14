@@ -10,7 +10,7 @@ use SushiCare\Lib\Response;
 
 $userId = Auth::userId();
 $babyId = baby_id($userId);
-$stmt = db()->prepare('SELECT type, subtype, amount_ml, duration_minutes FROM activities WHERE baby_id=? AND DATE(start_time)=CURDATE()');
+$stmt = db()->prepare('SELECT type, subtype, amount_ml, duration_minutes, meta_json FROM activities WHERE baby_id=? AND DATE(start_time)=CURDATE()');
 $stmt->execute([$babyId]);
 $summary = ActivityService::summarize($stmt->fetchAll());
 $weight = db()->prepare("SELECT weight_kg, start_time FROM activities WHERE baby_id=? AND type='health' AND subtype='weight' AND weight_kg IS NOT NULL ORDER BY start_time DESC LIMIT 2");

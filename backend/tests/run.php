@@ -55,7 +55,9 @@ assertSameValue(37.2, $localizedActivity['temperature'], 'Normalize nhiệt đ�
 $summary = ActivityService::summarize([
     ['type' => 'feeding', 'amount_ml' => 120, 'duration_minutes' => 0, 'subtype' => 'formula'],
     ['type' => 'feeding', 'amount_ml' => null, 'duration_minutes' => 20, 'subtype' => 'breast'],
+    ['type' => 'feeding', 'amount_ml' => null, 'duration_minutes' => 10, 'subtype' => 'breast_direct', 'meta_json' => '{"status":"running"}'],
     ['type' => 'sleep', 'duration_minutes' => 90, 'amount_ml' => null, 'subtype' => null],
+    ['type' => 'sleep', 'duration_minutes' => 15, 'amount_ml' => null, 'subtype' => null, 'meta_json' => '{"status":"paused"}'],
     ['type' => 'diaper', 'subtype' => 'mixed', 'duration_minutes' => 0, 'amount_ml' => null],
 ]);
 assertSameValue(2, $summary['feeding']['count'], 'Đếm cữ bú');

@@ -40,6 +40,10 @@ final class ActivityService
             'diaper' => ['wet' => 0, 'dirty' => 0],
         ];
         foreach ($rows as $row) {
+            $meta = json_decode((string) ($row['meta_json'] ?? ''), true);
+            if (in_array($meta['status'] ?? '', ['running', 'paused'], true)) {
+                continue;
+            }
             if ($row['type'] === 'feeding') {
                 $result['feeding']['count']++;
                 $result['feeding']['total_ml'] += (float) ($row['amount_ml'] ?? 0);

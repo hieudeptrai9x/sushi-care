@@ -3,6 +3,7 @@ import { useEffect, useState, type FormEvent } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { CartesianGrid, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
 import { Field } from './ActivityFormPage'
+import { DateTimeInput } from '../components/DateTimeInput'
 import { api } from '../services/api'
 import { toLocalInput } from '../utils/baby'
 import { useToast } from '../context/ToastContext'
@@ -34,14 +35,14 @@ export function HealthPage() {
     })
     toast('Đã lưu chỉ số sức khỏe'); setValue(''); if (tab === 'weight') load()
   }
-  return <div className="page-pad">
+  return <div className="page-pad form-page health-page">
     <header className="form-header"><button className="icon-button" onClick={() => navigate(-1)}><ArrowLeft /></button><div><small>THEO DÕI NHẸ NHÀNG</small><h1>Sức khỏe của bé</h1></div></header>
     <div className="filter-row"><button className={tab === 'weight' ? 'active' : ''} onClick={() => setTab('weight')}><Weight /> Cân nặng</button><button className={tab === 'temperature' ? 'active' : ''} onClick={() => setTab('temperature')}><Thermometer /> Nhiệt độ</button><button className={tab === 'spitup' ? 'active' : ''} onClick={() => setTab('spitup')}>Ọc sữa</button></div>
     <form className="card entry-form" onSubmit={submit}>
       {tab === 'weight' && <Field label="Cân nặng (kg)"><input type="text" inputMode="decimal" placeholder="Ví dụ 2,7" value={value} onChange={(e) => setValue(e.target.value)} required /></Field>}
       {tab === 'temperature' && <><Field label="Nhiệt độ (°C)"><input type="text" inputMode="decimal" placeholder="Ví dụ 37,2" value={value} onChange={(e) => setValue(e.target.value)} required /></Field><Field label="Vị trí đo"><select value={position} onChange={(e) => setPosition(e.target.value)}><option value="armpit">Nách</option><option value="ear">Tai</option><option value="forehead">Trán</option><option value="rectal">Hậu môn</option></select></Field></>}
       {tab === 'spitup' && <div className="safety-callout">Nếu bé ọc sữa kèm khó thở, tím tái, sặc nhiều hoặc lừ đừ, hãy liên hệ bác sĩ/cấp cứu ngay.</div>}
-      <Field label="Ngày giờ"><input type="datetime-local" value={time} onChange={(e) => setTime(e.target.value)} required /></Field>
+      <Field label="Ngày giờ"><DateTimeInput value={time} onChange={setTime} required /></Field>
       <Field label="Ghi chú"><textarea value={note} onChange={(e) => setNote(e.target.value)} /></Field>
       <button className="primary-button">Lưu chỉ số</button>
     </form>

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { calculateAge, durationMinutes, feedingGuidance, formatDuration } from './baby'
+import { calculateAge, combineLocalInput, durationMinutes, feedingGuidance, formatDuration, splitLocalInput } from './baby'
 import { parseLocaleDecimal } from './number'
 
 describe('calculateAge', () => {
@@ -16,6 +16,13 @@ describe('duration helpers', () => {
   it('tính đúng khoảng thời gian qua nửa đêm', () => {
     expect(durationMinutes('2026-06-14T23:30', '2026-06-15T01:00')).toBe(90)
     expect(formatDuration(90)).toBe('1 giờ 30 phút')
+  })
+})
+
+describe('local date and time fields', () => {
+  it('splits and combines a datetime-local value', () => {
+    expect(splitLocalInput('2026-06-14T14:30')).toEqual({ date: '2026-06-14', time: '14:30' })
+    expect(combineLocalInput('2026-06-14', '14:30')).toBe('2026-06-14T14:30')
   })
 })
 

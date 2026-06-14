@@ -33,6 +33,7 @@ export type Activity = {
   poop_texture?: string
   temperature?: number
   weight_kg?: number
+  meta_json?: string | Record<string, unknown>
   note?: string
 }
 

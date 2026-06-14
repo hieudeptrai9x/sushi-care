@@ -1,9 +1,12 @@
 import { Bell, BookHeart, CalendarDays, Home, Menu, Plus, X } from 'lucide-react'
 import { useState, type ReactNode } from 'react'
 import { NavLink, useLocation, useNavigate } from 'react-router-dom'
+import { api } from '../services/api'
+import { useToast } from '../context/ToastContext'
 
 const quickActions = [
   ['Bú', 'feeding', '🍼'],
+  ['Hút sữa', 'pump', '🥛'],
   ['Ngủ', 'sleep', '🌙'],
   ['Tã', 'diaper', '☁️'],
   ['Sức khỏe', 'health', '💗'],
@@ -18,11 +21,19 @@ export function isFocusRoute(pathname: string) {
 
 export function AppShell({ children }: { children: ReactNode }) {
   const navigate = useNavigate()
+  const toast = useToast()
   const { pathname } = useLocation()
   const [open, setOpen] = useState(false)
   const focused = isFocusRoute(pathname)
-  const go = (route: string) => {
+  const go = async (route: string) => {
     setOpen(false)
+    if (route === 'feeding' || route === 'sleep' || route === 'pump') {
+      const type = route === 'pump' ? 'feeding' : route
+      const result = await api.post<{ already_running: boolean }>('/api/activities/start.php', { type, subtype: route === 'pump' ? 'pump' : undefined })
+      toast(result.already_running ? 'Hoạt động này đang được theo dõi' : route === 'feeding' ? 'Đã bắt đầu cữ bú' : route === 'pump' ? 'Đã bắt đầu hút sữa' : 'Đã bắt đầu giấc ngủ')
+      navigate('/')
+      return
+    }
     navigate(route === 'health' ? '/health' : `/add/${route}`)
   }
   return (

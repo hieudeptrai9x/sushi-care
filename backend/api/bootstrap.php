@@ -5,12 +5,16 @@ declare(strict_types=1);
 use SushiCare\Config\Database;
 use SushiCare\Lib\Response;
 
+$sessionLifetime = 60 * 60 * 24 * 30;
+ini_set('session.gc_maxlifetime', (string) $sessionLifetime);
+ini_set('session.cookie_lifetime', (string) $sessionLifetime);
 session_name('sushi_care_session');
 session_set_cookie_params([
+    'lifetime' => $sessionLifetime,
     'httponly' => true,
     'secure' => !empty($_SERVER['HTTPS']),
     'samesite' => 'Lax',
-    'path' => '/',
+    'path' => '/baby-care/',
 ]);
 session_start();
 

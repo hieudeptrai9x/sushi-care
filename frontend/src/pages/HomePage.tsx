@@ -6,18 +6,20 @@ import { Loading } from '../components/Loading'
 import { api } from '../services/api'
 import type { Activity, Baby, Reminder, TodayStats } from '../types'
 import { calculateAge, feedingGuidance, formatDuration } from '../utils/baby'
+import { useToast } from '../context/ToastContext'
 
 export function HomePage() {
   const navigate = useNavigate()
+  const toast = useToast()
   const [baby, setBaby] = useState<Baby | null>(null)
   const [stats, setStats] = useState<TodayStats | null>(null)
   const [activities, setActivities] = useState<Activity[]>([])
   const [reminders, setReminders] = useState<Reminder[]>([])
   const [loading, setLoading] = useState(true)
 
-  useEffect(() => {
+  const load = () => {
     const today = new Date().toISOString().slice(0, 10)
-    Promise.all([
+    return Promise.all([
       api.get<Baby>('/api/baby/get.php'),
       api.get<TodayStats>('/api/stats/today.php'),
       api.get<Activity[]>(`/api/activities/list.php?date=${today}&type=all`),
@@ -25,13 +27,24 @@ export function HomePage() {
     ]).then(([babyData, statsData, activityData, reminderData]) => {
       setBaby(babyData); setStats(statsData); setActivities(activityData); setReminders(reminderData)
     }).finally(() => setLoading(false))
-  }, [])
+  }
+  useEffect(() => { void load() }, [])
+
+  const start = async (type: 'feeding' | 'sleep') => {
+    const result = await api.post<{ id: number; already_running: boolean }>('/api/activities/start.php', { type })
+    toast(result.already_running ? 'Hoạt động này đang được theo dõi' : type === 'feeding' ? 'Đã bắt đầu cữ bú' : 'Đã bắt đầu giấc ngủ')
+    await load()
+  }
+  const stop = async (activity: Activity) => {
+    await api.post('/api/activities/stop.php', { id: activity.id })
+    navigate(`/add/${activity.type}?activity=${activity.id}`)
+  }
 
   if (loading) return <div className="page-pad"><Loading cards={5} /></div>
   const milkGuide = baby ? feedingGuidance(baby.birth_date) : null
   return <>
     <header className="home-hero">
-      <div className="home-top"><div className="baby-avatar">{baby?.avatar_url ? <img src={baby.avatar_url} /> : '🍣'}</div><div><small>Chào buổi sáng</small><h1>{baby?.name ?? 'Bé Sushi'}</h1><p>{baby ? calculateAge(baby.birth_date) : ''}</p></div><button className="icon-button glass"><Bell /></button></div>
+      <div className="home-top"><div className="baby-avatar">{baby?.avatar_url ? <img src={baby.avatar_url} /> : '🍣'}</div><div><small>Chào buổi sáng</small><h1>{baby?.name ?? 'Bé Sushi'}</h1><p>{baby ? calculateAge(baby.birth_date) : ''}</p></div><button className="icon-button glass notification-button" onClick={() => navigate('/reminders')} aria-label="Mở nhắc nhở"><Bell />{reminders.some((item) => !item.is_done) && <i />}</button></div>
       {milkGuide && <div className="feeding-guide">
         <div className="feeding-guide-icon"><Milk /></div>
         <div><small>GỢI Ý SỮA CÔNG THỨC THEO TUỔI</small><strong>{milkGuide.amount}</strong><span>{milkGuide.cadence} · Nguồn {milkGuide.source}</span></div>
@@ -43,10 +56,10 @@ export function HomePage() {
       <section>
         <div className="section-title"><div><small>NHỊP ĐIỆU CỦA BÉ</small><h2>Tổng quan hôm nay</h2></div><span className="live-pill">Hôm nay</span></div>
         <div className="stats-grid">
-          <Stat icon="🍼" tone="pink" label="Bú" value={`${stats?.feeding.count ?? 0} lần`} sub={`${stats?.feeding.total_ml ?? 0} ml`} />
-          <Stat icon={<MoonStar />} tone="blue" label="Ngủ" value={formatDuration(stats?.sleep.minutes ?? 0)} sub={`${stats?.sleep.count ?? 0} giấc`} />
-          <Stat icon={<Droplets />} tone="mint" label="Tã" value={`${stats?.diaper.wet ?? 0} ướt`} sub={`${stats?.diaper.dirty ?? 0} bẩn`} />
-          <Stat icon={<Scale />} tone="yellow" label="Cân nặng" value={stats?.weight.current ? `${stats.weight.current} kg` : 'Chưa có'} sub={stats?.weight.change ? `${stats.weight.change > 0 ? '+' : ''}${stats.weight.change} kg` : 'Ghi lần đầu'} />
+          <Stat icon="🍼" tone="pink" label="Bú" value={`${stats?.feeding.count ?? 0} lần`} sub={`${stats?.feeding.total_ml ?? 0} ml`} onClick={() => start('feeding')} />
+          <Stat icon={<MoonStar />} tone="blue" label="Ngủ" value={formatDuration(stats?.sleep.minutes ?? 0)} sub={`${stats?.sleep.count ?? 0} giấc`} onClick={() => start('sleep')} />
+          <Stat icon={<Droplets />} tone="mint" label="Tã" value={`${stats?.diaper.wet ?? 0} ướt`} sub={`${stats?.diaper.dirty ?? 0} bẩn`} onClick={() => navigate('/add/diaper')} />
+          <Stat icon={<Scale />} tone="yellow" label="Cân nặng" value={stats?.weight.current ? `${stats.weight.current} kg` : 'Chưa có'} sub={stats?.weight.change ? `${stats.weight.change > 0 ? '+' : ''}${stats.weight.change} kg` : 'Ghi lần đầu'} onClick={() => navigate('/health')} />
         </div>
       </section>
       <button className="ai-banner" onClick={() => navigate('/ai')}>
@@ -54,7 +67,7 @@ export function HomePage() {
       </button>
       <section>
         <div className="section-title"><h2>Dòng thời gian</h2><button onClick={() => navigate('/journal')}>Xem tất cả</button></div>
-        <div className="card timeline-card">{activities.length ? activities.slice(0, 5).map((activity) => <ActivityCard key={activity.id} activity={activity} />) : <p className="soft-copy">Chưa có hoạt động hôm nay. Chạm dấu + để ghi hoạt động đầu tiên.</p>}</div>
+        <div className="card timeline-card">{activities.length ? activities.slice(0, 5).map((activity) => <ActivityCard key={activity.id} activity={activity} onStop={stop} onComplete={(item) => navigate(`/add/${item.type}?activity=${item.id}`)} />) : <p className="soft-copy">Chưa có hoạt động hôm nay. Chạm một thẻ phía trên để bắt đầu.</p>}</div>
       </section>
       <section className="card wellbeing-card">
         <div className="wellbeing-icon">💗</div><div><small>BÉ HÔM NAY THẾ NÀO?</small><p>Hôm nay bé bú <b>{stats?.feeding.count ?? 0} lần</b>, ngủ <b>{formatDuration(stats?.sleep.minutes ?? 0)}</b> và có <b>{(stats?.diaper.wet ?? 0) + (stats?.diaper.dirty ?? 0)} lượt tã</b>. Chưa ghi nhận dấu hiệu bất thường.</p></div>
@@ -69,6 +82,6 @@ export function HomePage() {
   </>
 }
 
-function Stat({ icon, tone, label, value, sub }: { icon: React.ReactNode; tone: string; label: string; value: string; sub: string }) {
-  return <article className={`stat-card ${tone}`}><span className="stat-icon">{icon}</span><div><small>{label}</small><strong>{value}</strong><span>{sub}</span></div></article>
+function Stat({ icon, tone, label, value, sub, onClick }: { icon: React.ReactNode; tone: string; label: string; value: string; sub: string; onClick: () => void }) {
+  return <button className={`stat-card ${tone}`} onClick={onClick}><span className="stat-icon">{icon}</span><span className="stat-copy"><small>{label}</small><strong>{value}</strong><span>{sub}</span></span></button>
 }

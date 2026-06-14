@@ -237,3 +237,33 @@ input[type="datetime-local"]::-webkit-date-and-time-value{text-align:left}
 .markdown-message ol{padding-left:18px}
 .markdown-message li{margin:3px 0;padding-left:1px}
 .markdown-message strong{font-weight:700;color:#3d3238}
+
+/* Timers, robust iOS fields and actionable dashboard */
+.date-time-grid{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(0,.75fr);gap:8px;min-width:0;max-width:100%}
+.date-time-grid input{min-width:0;width:100%;max-width:100%;-webkit-appearance:none;appearance:none}
+.entry-form .field{overflow:hidden}
+.health-page .form-header{grid-template-columns:40px minmax(0,1fr)}
+.health-page .form-header>div:last-child{min-width:0}
+.feeding-note{padding:10px 12px;border-radius:13px;background:#f2edff;color:#6d58a8;font-size:10px;line-height:1.55}
+.segment{overflow-x:auto}
+.segment button{min-width:78px}
+.stat-card{width:100%;font:inherit;color:inherit;cursor:pointer}
+.stat-card:active{transform:scale(.98)}
+.stat-copy{display:grid;min-width:0}
+.notification-button{position:relative}
+.notification-button i{position:absolute;right:7px;top:6px;width:7px;height:7px;border-radius:50%;background:var(--pink);border:2px solid #fff}
+.timeline-item.activity-running,.timeline-item.activity-paused{background:linear-gradient(90deg,#fff8fa,#faf7ff);margin:4px -7px;padding:0 7px;border-radius:14px}
+.timeline-item.activity-running .timeline-copy strong{color:var(--pink)}
+.timeline-item.activity-paused .timeline-copy strong{color:var(--purple)}
+.timeline-icon.is-spinning{animation:activityPulse 1.4s ease-in-out infinite}
+.activity-control{width:30px;height:30px;border:0;border-radius:50%;display:grid;place-items:center;background:var(--purple-soft);color:var(--purple)}
+.activity-control.stop{background:var(--pink-soft);color:var(--pink)}
+.activity-control svg{width:13px;height:13px}
+@keyframes activityPulse{0%,100%{transform:rotate(0) scale(1)}50%{transform:rotate(180deg) scale(1.08)}}
+.chat-header .icon-button{background:#fff;color:#655960;border:1px solid #f0e5ea;box-shadow:0 5px 16px rgba(77,51,61,.08)}
+.settings-group button{color:#493e44}
+.settings-group button:disabled{opacity:.62;cursor:not-allowed}
+.settings-group button strong{color:#493e44}
+.settings-group button em{margin-left:auto;font-size:8px;font-style:normal;color:#9b8d95;background:#f4eff2;padding:4px 7px;border-radius:20px}
+.settings-group button>svg{margin-left:auto}
+@media(max-width:360px){.date-time-grid{grid-template-columns:1fr}.segment button{min-width:72px}}
