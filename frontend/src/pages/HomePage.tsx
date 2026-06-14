@@ -1,11 +1,11 @@
-import { Bell, Bot, CalendarDays, ChevronRight, Droplets, MoonStar, Scale, Sparkles } from 'lucide-react'
+import { Bell, Bot, CalendarDays, ChevronRight, Droplets, Info, Milk, MoonStar, Scale } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { ActivityCard } from '../components/ActivityCard'
 import { Loading } from '../components/Loading'
 import { api } from '../services/api'
 import type { Activity, Baby, Reminder, TodayStats } from '../types'
-import { calculateAge, formatDuration } from '../utils/baby'
+import { calculateAge, feedingGuidance, formatDuration } from '../utils/baby'
 
 export function HomePage() {
   const navigate = useNavigate()
@@ -28,10 +28,16 @@ export function HomePage() {
   }, [])
 
   if (loading) return <div className="page-pad"><Loading cards={5} /></div>
+  const milkGuide = baby ? feedingGuidance(baby.birth_date) : null
   return <>
     <header className="home-hero">
       <div className="home-top"><div className="baby-avatar">{baby?.avatar_url ? <img src={baby.avatar_url} /> : '🍣'}</div><div><small>Chào buổi sáng</small><h1>{baby?.name ?? 'Bé Sushi'}</h1><p>{baby ? calculateAge(baby.birth_date) : ''}</p></div><button className="icon-button glass"><Bell /></button></div>
-      <div className="daily-message"><Sparkles /><span>Mỗi khoảnh khắc nhỏ đều là một điều đáng nhớ.</span></div>
+      {milkGuide && <div className="feeding-guide">
+        <div className="feeding-guide-icon"><Milk /></div>
+        <div><small>GỢI Ý SỮA CÔNG THỨC THEO TUỔI</small><strong>{milkGuide.amount}</strong><span>{milkGuide.cadence} · Nguồn {milkGuide.source}</span></div>
+        <a className="feeding-source" href="https://www.cdc.gov/infant-toddler-nutrition/formula-feeding/how-much-and-how-often.html" target="_blank" rel="noreferrer" aria-label="Xem nguồn hướng dẫn của CDC"><Info /></a>
+        <p>{milkGuide.note} Ưu tiên tín hiệu đói/no và hướng dẫn của bác sĩ.</p>
+      </div>}
     </header>
     <div className="page-pad home-body">
       <section>

@@ -1,4 +1,4 @@
-import { Bell, BookHeart, CalendarDays, Home, Image, Menu, Plus, X } from 'lucide-react'
+import { Bell, BookHeart, CalendarDays, Home, Menu, Plus, X } from 'lucide-react'
 import { useState, type ReactNode } from 'react'
 import { NavLink, useNavigate } from 'react-router-dom'
 
@@ -7,7 +7,6 @@ const quickActions = [
   ['Ngủ', 'sleep', '🌙'],
   ['Tã', 'diaper', '☁️'],
   ['Sức khỏe', 'health', '💗'],
-  ['Khoảnh khắc', 'moments', '📷'],
   ['Ghi chú', 'note', '✍️'],
 ]
 
@@ -16,7 +15,7 @@ export function AppShell({ children }: { children: ReactNode }) {
   const [open, setOpen] = useState(false)
   const go = (route: string) => {
     setOpen(false)
-    navigate(route === 'moments' ? '/moments' : route === 'health' ? '/health' : `/add/${route}`)
+    navigate(route === 'health' ? '/health' : `/add/${route}`)
   }
   return (
     <div className="app-frame">
@@ -26,7 +25,7 @@ export function AppShell({ children }: { children: ReactNode }) {
       <nav className="bottom-nav">
         <NavLink to="/"><Home /><span>Trang chủ</span></NavLink>
         <NavLink to="/journal"><BookHeart /><span>Nhật ký</span></NavLink>
-        <NavLink to="/moments"><Image /><span>Khoảnh khắc</span></NavLink>
+        <span className="nav-action-space" aria-hidden="true" />
         <NavLink to="/reminders"><CalendarDays /><span>Lịch</span></NavLink>
         <NavLink to="/settings"><Menu /><span>Thêm</span></NavLink>
       </nav>

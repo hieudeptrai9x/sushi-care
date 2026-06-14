@@ -37,6 +37,16 @@ $activity = ActivityService::normalize([
 assertSameValue('feeding', $activity['type'], 'Normalize type');
 assertSameValue(120.0, $activity['amount_ml'], 'Normalize lượng sữa');
 
+$localizedActivity = ActivityService::normalize([
+    'type' => 'health',
+    'subtype' => 'weight',
+    'start_time' => '2026-06-14 08:00:00',
+    'weight_kg' => '2,7',
+    'temperature' => '37,2',
+]);
+assertSameValue(2.7, $localizedActivity['weight_kg'], 'Normalize cân nặng có dấu phẩy');
+assertSameValue(37.2, $localizedActivity['temperature'], 'Normalize nhiệt độ có dấu phẩy');
+
 $summary = ActivityService::summarize([
     ['type' => 'feeding', 'amount_ml' => 120, 'duration_minutes' => 0, 'subtype' => 'formula'],
     ['type' => 'feeding', 'amount_ml' => null, 'duration_minutes' => 20, 'subtype' => 'breast'],

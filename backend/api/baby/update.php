@@ -26,8 +26,8 @@ $stmt->execute([
     trim((string) ($data['nickname'] ?? '')) ?: null,
     $birthDate->format('Y-m-d'),
     $gender,
-    ($data['birth_weight'] ?? '') !== '' ? (float) $data['birth_weight'] : null,
-    ($data['birth_length'] ?? '') !== '' ? (float) $data['birth_length'] : null,
+    Validator::decimal($data['birth_weight'] ?? null),
+    Validator::decimal($data['birth_length'] ?? null),
     trim((string) ($data['note'] ?? '')) ?: null,
     $userId,
 ]);

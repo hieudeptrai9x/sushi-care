@@ -52,12 +52,3 @@ export type Reminder = {
   note?: string
   is_done: number
 }
-
-export type Moment = {
-  id: number
-  file_url: string
-  file_type: 'image' | 'video'
-  caption?: string
-  milestone_label?: string
-  taken_at: string
-}

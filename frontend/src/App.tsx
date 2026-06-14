@@ -10,7 +10,6 @@ import { HealthPage } from './pages/HealthPage'
 import { HomePage } from './pages/HomePage'
 import { JournalPage } from './pages/JournalPage'
 import { LoginPage } from './pages/LoginPage'
-import { MomentsPage } from './pages/MomentsPage'
 import { RemindersPage } from './pages/RemindersPage'
 import { SettingsPage } from './pages/SettingsPage'
 import { ChangePasswordPage } from './pages/ChangePasswordPage'
@@ -22,7 +21,6 @@ function Protected() {
   return <AppShell><Routes>
     <Route path="/" element={<HomePage />} />
     <Route path="/journal" element={<JournalPage />} />
-    <Route path="/moments" element={<MomentsPage />} />
     <Route path="/reminders" element={<RemindersPage />} />
     <Route path="/settings" element={<SettingsPage />} />
     <Route path="/baby" element={<BabyProfilePage />} />

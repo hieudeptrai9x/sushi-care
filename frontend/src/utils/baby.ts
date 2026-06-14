@@ -15,6 +15,65 @@ export function calculateAge(birthDate: string, now = new Date()): string {
   return `${months} tháng${remainingDays ? ` ${remainingDays} ngày` : ''}`
 }
 
+export type FeedingGuidance = {
+  amount: string
+  cadence: string
+  note: string
+  source: string
+}
+
+export function feedingGuidance(birthDate: string, now = new Date()): FeedingGuidance {
+  const birth = new Date(`${birthDate}T00:00:00`)
+  const days = Math.max(0, Math.floor((startOfDay(now).getTime() - birth.getTime()) / DAY))
+
+  if (days <= 7) {
+    return {
+      amount: '30–60 ml/cữ',
+      cadence: 'mỗi 2–3 giờ',
+      note: 'Mức tham khảo cho bé chỉ dùng sữa công thức trong những ngày đầu.',
+      source: 'CDC',
+    }
+  }
+  if (days < 21) {
+    return {
+      amount: 'Tăng dần theo nhu cầu',
+      cadence: 'thường mỗi 3–4 giờ',
+      note: 'Dạ dày bé đang lớn dần; hãy quan sát tín hiệu đói và no.',
+      source: 'CDC',
+    }
+  }
+  if (days < 45) {
+    return {
+      amount: '90–120 ml/cữ',
+      cadence: 'thường mỗi 3–4 giờ',
+      note: 'Mốc tham khảo khi gần cuối tháng đầu, không cần ép bé bú hết.',
+      source: 'AAP',
+    }
+  }
+  if (days < 165) {
+    return {
+      amount: 'Lượng tăng dần theo bé',
+      cadence: 'thường mỗi 3–4 giờ',
+      note: 'Theo dõi tăng trưởng, tã ướt và tín hiệu đói/no để điều chỉnh.',
+      source: 'CDC · AAP',
+    }
+  }
+  if (days < 210) {
+    return {
+      amount: '180–240 ml/cữ',
+      cadence: 'khoảng 4–5 cữ/ngày',
+      note: 'Mốc tham khảo quanh 6 tháng; nhu cầu từng bé có thể khác.',
+      source: 'AAP',
+    }
+  }
+  return {
+    amount: 'Theo nhu cầu của bé',
+    cadence: 'kết hợp lịch ăn dặm',
+    note: 'Sữa mẹ hoặc sữa công thức vẫn quan trọng trong năm đầu đời.',
+    source: 'CDC',
+  }
+}
+
 function startOfDay(date: Date): Date {
   return new Date(date.getFullYear(), date.getMonth(), date.getDate())
 }

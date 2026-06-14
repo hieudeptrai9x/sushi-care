@@ -1,6 +1,6 @@
 # Sushi Care
 
-PWA tiếng Việt theo dõi việc chăm sóc bé sau sinh: bú, ngủ, tã, sức khỏe, khoảnh khắc, nhắc nhở và AI hỏi nhanh.
+PWA tiếng Việt theo dõi việc chăm sóc bé sau sinh: bú, ngủ, tã, sức khỏe, nhắc nhở và AI hỏi nhanh.
 
 ## Công nghệ
 

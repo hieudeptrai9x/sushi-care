@@ -16,6 +16,18 @@ final class Validator
         return is_string($value) && in_array($value, $allowed, true);
     }
 
+    public static function decimal(mixed $value): ?float
+    {
+        if ($value === null || trim((string) $value) === '') {
+            return null;
+        }
+        $normalized = str_replace(',', '.', preg_replace('/\s+/', '', trim((string) $value)) ?? '');
+        if (!preg_match('/^-?\d+(?:\.\d+)?$/', $normalized)) {
+            throw new \InvalidArgumentException('Số thập phân không hợp lệ.');
+        }
+        return (float) $normalized;
+    }
+
     public static function requiredString(array $data, string $key, int $max = 5000): string
     {
         $value = trim((string) ($data[$key] ?? ''));
