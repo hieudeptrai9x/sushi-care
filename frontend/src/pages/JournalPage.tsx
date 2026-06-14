@@ -25,7 +25,7 @@ export function JournalPage() {
     await api.post('/api/activities/delete.php', { id })
     toast('Đã xóa nhật ký'); load()
   }
-  return <div className="page-pad">
+  return <div className="page-pad journal-page">
     <PageHeader title="Nhật ký của bé" subtitle="MỖI NGÀY MỘT CÂU CHUYỆN" />
     <input className="date-picker" type="date" value={date} onChange={(e) => setDate(e.target.value)} />
     <div className="filter-row">{filters.map(([key, label]) => <button className={filter === key ? 'active' : ''} onClick={() => setFilter(key)} key={key}>{label}</button>)}</div>
