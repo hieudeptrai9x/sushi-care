@@ -37,11 +37,37 @@ export function ActivityFormPage() {
   const [note, setNote] = useState('')
   const [busy, setBusy] = useState(false)
   const [loadedStatus, setLoadedStatus] = useState<ActivityStatus>('completed')
+  const [aiDraftLoaded, setAiDraftLoaded] = useState(false)
+  const [draftMeta, setDraftMeta] = useState<Record<string, unknown>>({})
   const duration = useMemo(() => end ? durationMinutes(start, end) : Number(minutes || 0), [start, end, minutes])
-  const recordedDuration = usesRecordedDuration(activityId, loadedStatus, end)
+  const recordedDuration = usesRecordedDuration(activityId, loadedStatus, end) || (aiDraftLoaded && end !== '')
 
   useEffect(() => {
-    if (!activityId) return
+    if (!activityId) {
+      const raw = sessionStorage.getItem('sushi_ai_activity_draft')
+      if (!raw) return
+      sessionStorage.removeItem('sushi_ai_activity_draft')
+      try {
+        const draft = JSON.parse(raw)
+        const nextSubtype = draft.type === 'pumping' ? 'pump' : draft.subtype === 'breastfeeding' ? 'breast_direct' : draft.subtype === 'bottle' ? 'breast_bottle' : draft.subtype
+        setSubtype(nextSubtype || (type === 'feeding' ? 'breast_direct' : ''))
+        setStart(draft.start_time?.replace(' ', 'T').slice(0, 16) || toLocalInput())
+        setEnd(draft.end_time?.replace(' ', 'T').slice(0, 16) || '')
+        setAmount(draft.amount_ml ? String(draft.amount_ml) : '')
+        setMinutes(draft.duration_minutes ? String(draft.duration_minutes) : '')
+        setSide(draft.side || 'both')
+        setWetLevel(draft.wet_level || 'medium')
+        setPoopColor(draft.poop_color || 'yellow')
+        setPoopTexture(draft.poop_texture || 'soft')
+        setNote(draft.note || '')
+        const meta = draft.meta_json && typeof draft.meta_json === 'object' ? draft.meta_json : {}
+        setDraftMeta(meta)
+        setLeftAmount(meta.left_ml ? String(meta.left_ml) : '')
+        setRightAmount(meta.right_ml ? String(meta.right_ml) : '')
+        setAiDraftLoaded(true)
+      } catch { /* Ignore invalid drafts and keep a clean manual form. */ }
+      return
+    }
     api.get<Activity>(`/api/activities/get.php?id=${activityId}`).then((activity) => {
       setLoadedStatus(activityStatus(activity))
       setSubtype(activity.subtype || (type === 'feeding' ? 'breast_direct' : ''))
@@ -68,7 +94,7 @@ export function ActivityFormPage() {
         type, subtype: subtype || undefined, start_time: start, end_time: end || undefined,
         duration_minutes: duration, amount_ml: subtype === 'pump' ? pumpTotal : amount || undefined, side, wet_level: wetLevel,
         poop_color: poopColor, poop_texture: poopTexture, note,
-        meta: { status: 'completed', ...(subtype === 'pump' ? { left_ml: Number(leftAmount || 0), right_ml: Number(rightAmount || 0) } : {}) },
+        meta: { ...draftMeta, status: 'completed', ...(subtype === 'pump' ? { left_ml: Number(leftAmount || 0), right_ml: Number(rightAmount || 0) } : {}) },
       }
       await api.post(activityId ? '/api/activities/update.php' : '/api/activities/create.php', payload)
       toast('Đã lưu vào nhật ký của bé')

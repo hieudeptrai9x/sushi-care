@@ -3,10 +3,12 @@ import { useEffect, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { ActivityCard } from '../components/ActivityCard'
 import { Loading } from '../components/Loading'
+import { QuickAiInputCard } from '../components/QuickAiInputCard'
 import { api } from '../services/api'
 import type { Activity, Baby, Reminder, TodayStats } from '../types'
 import { calculateAge, feedingGuidance, formatDuration } from '../utils/baby'
 import { useToast } from '../context/ToastContext'
+import { formatVietnameseDateTime } from '../utils/dateTime'
 
 export function HomePage() {
   const navigate = useNavigate()
@@ -64,6 +66,7 @@ export function HomePage() {
           <Stat icon={<Scale />} tone="yellow" label="Cân nặng" value={stats?.weight.current ? `${stats.weight.current} kg` : 'Chưa có'} sub={stats?.weight.change ? `${stats.weight.change > 0 ? '+' : ''}${stats.weight.change} kg` : 'Ghi lần đầu'} onClick={() => navigate('/health')} />
         </div>
       </section>
+      {baby && <QuickAiInputCard babyId={baby.id} onSaved={load} />}
       <button className="ai-banner" onClick={() => navigate('/ai')}>
         <div className="robot-orb"><Bot /></div><div><small>TRỢ LÝ RIÊNG CỦA MẸ</small><strong>AI hỏi nhanh 24/7</strong><span>Hỏi về giấc ngủ, dinh dưỡng và chăm sóc bé...</span></div><ChevronRight />
       </button>
@@ -76,7 +79,7 @@ export function HomePage() {
       </section>
       <section>
         <div className="section-title"><h2>Lịch & nhắc nhở</h2><button onClick={() => navigate('/reminders')}>Mở lịch</button></div>
-        <div className="reminder-strip">{reminders.filter((item) => !item.is_done).slice(0, 3).map((item) => <article key={item.id}><CalendarDays /><div><strong>{item.title}</strong><span>{new Date(item.reminder_time.replace(' ', 'T')).toLocaleString('vi-VN')}</span></div></article>)}
+        <div className="reminder-strip">{reminders.filter((item) => !item.is_done).slice(0, 3).map((item) => <article key={item.id}><CalendarDays /><div><strong>{item.title}</strong><span>{formatVietnameseDateTime(item.reminder_time)}</span></div></article>)}
           {!reminders.length && <p className="soft-copy">Chưa có lịch nhắc sắp tới.</p>}
         </div>
       </section>
@@ -85,5 +88,5 @@ export function HomePage() {
 }
 
 function Stat({ icon, tone, label, value, sub, onClick }: { icon: React.ReactNode; tone: string; label: string; value: string; sub: string; onClick: () => void }) {
-  return <button className={`stat-card ${tone}`} onClick={onClick}><span className="stat-icon">{icon}</span><span className="stat-copy"><small>{label}</small><strong>{value}</strong><span>{sub}</span></span></button>
+  return <button className={`stat-card ${tone}`} onClick={onClick}><span className="stat-icon">{icon}</span><span className="stat-copy"><strong>{label} · {value}</strong><span>{sub}</span></span></button>
 }

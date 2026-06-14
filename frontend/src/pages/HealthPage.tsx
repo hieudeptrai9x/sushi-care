@@ -21,11 +21,27 @@ export function HealthPage() {
   const [time, setTime] = useState(toLocalInput())
   const [note, setNote] = useState('')
   const [position, setPosition] = useState('armpit')
+  const [draftMeta, setDraftMeta] = useState<Record<string, unknown>>({})
   const [weights, setWeights] = useState<WeightPoint[]>([])
   const load = () => api.get<WeightPoint[]>('/api/stats/weight.php').then(setWeights)
   useEffect(() => { load() }, [])
   useEffect(() => {
-    if (!activityId) return
+    if (!activityId) {
+      const raw = sessionStorage.getItem('sushi_ai_activity_draft')
+      if (!raw) return
+      sessionStorage.removeItem('sushi_ai_activity_draft')
+      try {
+        const draft = JSON.parse(raw)
+        setTab(draft.subtype === 'spit_up' ? 'spitup' : draft.subtype || 'weight')
+        setValue(String(draft.weight_kg ?? draft.temperature ?? ''))
+        setTime(draft.start_time?.replace(' ', 'T').slice(0, 16) || toLocalInput())
+        setNote(draft.note || '')
+        const meta = draft.meta_json && typeof draft.meta_json === 'object' ? draft.meta_json : {}
+        setDraftMeta(meta)
+        setPosition(String(meta.position || 'armpit'))
+      } catch { /* Ignore invalid drafts. */ }
+      return
+    }
     api.get<Activity>(`/api/activities/get.php?id=${activityId}`).then((activity) => {
       setTab(activity.subtype || 'weight')
       setValue(String(activity.weight_kg ?? activity.temperature ?? ''))
@@ -48,7 +64,7 @@ export function HealthPage() {
       type: 'health', subtype: tab, start_time: time,
       weight_kg: tab === 'weight' ? decimalPayload(value) : undefined,
       temperature: tab === 'temperature' ? decimalPayload(value) : undefined,
-      meta: { position }, note,
+      meta: { ...draftMeta, position }, note,
     })
     toast(activityId ? 'Đã cập nhật chỉ số sức khỏe' : 'Đã lưu chỉ số sức khỏe')
     if (activityId) navigate('/journal')

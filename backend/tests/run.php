@@ -6,6 +6,7 @@ require_once __DIR__ . '/../lib/Validator.php';
 require_once __DIR__ . '/../lib/AiSafety.php';
 require_once __DIR__ . '/../lib/Secret.php';
 require_once __DIR__ . '/../lib/ActivityService.php';
+require_once __DIR__ . '/../lib/QuickInputParser.php';
 
 use SushiCare\Lib\ActivityService;
 use SushiCare\Lib\AiSafety;
@@ -67,5 +68,7 @@ assertSameValue(120.0, $summary['feeding']['total_ml'], 'Tổng ml');
 assertSameValue(90, $summary['sleep']['minutes'], 'Tổng ngủ');
 assertSameValue(1, $summary['diaper']['wet'], 'Tã ướt từ mixed');
 assertSameValue(1, $summary['diaper']['dirty'], 'Tã bẩn từ mixed');
+
+require __DIR__ . '/QuickInputParserTest.php';
 
 echo "Backend tests passed\n";
