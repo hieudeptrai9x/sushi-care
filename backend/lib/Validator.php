@@ -17,6 +17,17 @@ final class Validator
             && preg_match('/^[a-zA-Z0-9._@-]{3,190}$/', trim($value)) === 1;
     }
 
+    public static function apiKey(mixed $value): bool
+    {
+        if (!is_string($value)) {
+            return false;
+        }
+        $value = trim($value);
+        return str_starts_with($value, 'sk-')
+            && strlen($value) >= 24
+            && !str_contains($value, '...');
+    }
+
     public static function oneOf(mixed $value, array $allowed): bool
     {
         return is_string($value) && in_array($value, $allowed, true);

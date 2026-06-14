@@ -8,6 +8,7 @@ use SushiCare\Lib\AiSettings;
 use SushiCare\Lib\Auth;
 use SushiCare\Lib\OpenAICompatibleProvider;
 use SushiCare\Lib\Response;
+use SushiCare\Lib\Validator;
 
 require_method('POST');
 $userId = Auth::userId();
@@ -22,7 +23,14 @@ foreach ($data as $key => $value) {
 if ($current['api_key'] === '') {
     Response::error('Vui lòng nhập API key.', 422);
 }
-$reply = (new OpenAICompatibleProvider())->chat([
-    ['role' => 'user', 'content' => 'Chỉ trả lời đúng hai từ: Kết nối tốt'],
-], $current);
+if (!Validator::apiKey($current['api_key'])) {
+    Response::error('API key không hợp lệ. Hãy nhập key đầy đủ bắt đầu bằng sk-, không dùng Serial.', 422);
+}
+try {
+    $reply = (new OpenAICompatibleProvider())->chat([
+        ['role' => 'user', 'content' => 'Chỉ trả lời đúng hai từ: Kết nối tốt'],
+    ], $current);
+} catch (RuntimeException $error) {
+    Response::error('Không thể kết nối AI: ' . $error->getMessage(), 502);
+}
 Response::json(['message' => 'Kết nối thành công.', 'reply' => $reply]);
