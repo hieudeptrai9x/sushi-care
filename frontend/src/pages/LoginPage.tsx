@@ -5,7 +5,7 @@ import { useAuth } from '../context/AuthContext'
 
 export function LoginPage() {
   const { user, login } = useAuth()
-  const [email, setEmail] = useState('admin@example.com')
+  const [email, setEmail] = useState('admin')
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
   const [busy, setBusy] = useState(false)
@@ -25,7 +25,7 @@ export function LoginPage() {
     </section>
     <form className="login-card" onSubmit={submit}>
       <div><small>Chào mừng trở lại</small><h2>Đăng nhập</h2></div>
-      <label>Email<input type="email" autoComplete="username" value={email} onChange={(e) => setEmail(e.target.value)} required /></label>
+      <label>ID đăng nhập<input type="text" autoCapitalize="none" autoComplete="username" value={email} onChange={(e) => setEmail(e.target.value)} required /></label>
       <label>Mật khẩu<input type="password" autoComplete="current-password" value={password} onChange={(e) => setPassword(e.target.value)} required /></label>
       {error && <p className="form-error">{error}</p>}
       <button className="primary-button" disabled={busy}>{busy ? 'Đang đăng nhập...' : 'Đăng nhập'}</button>

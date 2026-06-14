@@ -22,6 +22,8 @@ function assertSameValue(mixed $expected, mixed $actual, string $message): void
 
 assertSameValue(true, Validator::email('me@example.com'), 'Email hợp lệ');
 assertSameValue(false, Validator::email('not-an-email'), 'Email không hợp lệ');
+assertSameValue(true, Validator::loginId('admin'), 'ID đăng nhập hợp lệ');
+assertSameValue(false, Validator::loginId('a'), 'ID đăng nhập quá ngắn');
 assertSameValue(true, Validator::oneOf('sleep', ['feeding', 'sleep']), 'Enum hợp lệ');
 assertSameValue('sk-************abcd', Secret::mask('sk-1234567890abcd'), 'Mask secret');
 assertSameValue(true, AiSafety::isEmergency('Bé bị tím tái và khó thở'), 'Nhận diện dấu hiệu nguy hiểm');

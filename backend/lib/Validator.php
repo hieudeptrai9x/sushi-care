@@ -11,6 +11,12 @@ final class Validator
         return is_string($value) && filter_var($value, FILTER_VALIDATE_EMAIL) !== false;
     }
 
+    public static function loginId(mixed $value): bool
+    {
+        return is_string($value)
+            && preg_match('/^[a-zA-Z0-9._@-]{3,190}$/', trim($value)) === 1;
+    }
+
     public static function oneOf(mixed $value, array $allowed): bool
     {
         return is_string($value) && in_array($value, $allowed, true);

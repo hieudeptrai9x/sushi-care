@@ -11,15 +11,15 @@ use SushiCare\Lib\Validator;
 require_method('POST');
 $data = input();
 $email = strtolower(trim((string) ($data['email'] ?? '')));
-if (!Validator::email($email) || !is_string($data['password'] ?? null)) {
-    Response::error('Email hoặc mật khẩu không hợp lệ.', 422);
+if (!Validator::loginId($email) || !is_string($data['password'] ?? null)) {
+    Response::error('ID hoặc mật khẩu không hợp lệ.', 422);
 }
 
 $stmt = db()->prepare('SELECT id, name, email, password_hash, role, must_change_password FROM users WHERE email = ? LIMIT 1');
 $stmt->execute([$email]);
 $user = $stmt->fetch();
 if (!$user || !password_verify((string) $data['password'], $user['password_hash'])) {
-    Response::error('Email hoặc mật khẩu không đúng.', 401);
+    Response::error('ID hoặc mật khẩu không đúng.', 401);
 }
 
 session_regenerate_id(true);
