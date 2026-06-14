@@ -13,7 +13,11 @@ const quickActions = [
   ['Ghi chú', 'note', '✍️'],
 ]
 
-const focusRoutes = ['/health', '/baby', '/change-password', '/ai', '/ai-settings']
+const focusRoutes = ['/health', '/baby', '/change-password', '/ai', '/ai-settings', '/caregivers']
+
+export function homeRefreshState(now = Date.now()) {
+  return { refreshAt: now }
+}
 
 export function isFocusRoute(pathname: string) {
   return pathname.startsWith('/add/') || focusRoutes.includes(pathname)
@@ -31,7 +35,7 @@ export function AppShell({ children }: { children: ReactNode }) {
       const type = route === 'pump' ? 'feeding' : route
       const result = await api.post<{ already_running: boolean }>('/api/activities/start.php', { type, subtype: route === 'pump' ? 'pump' : undefined })
       toast(result.already_running ? 'Hoạt động này đang được theo dõi' : route === 'feeding' ? 'Đã bắt đầu cữ bú' : route === 'pump' ? 'Đã bắt đầu hút sữa' : 'Đã bắt đầu giấc ngủ')
-      navigate('/')
+      navigate('/', { state: homeRefreshState() })
       return
     }
     navigate(route === 'health' ? '/health' : `/add/${route}`)

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { isFocusRoute } from './AppShell'
+import { homeRefreshState, isFocusRoute } from './AppShell'
 
 describe('isFocusRoute', () => {
   it.each([
@@ -21,4 +21,10 @@ describe('isFocusRoute', () => {
       expect(isFocusRoute(pathname)).toBe(false)
     },
   )
+})
+
+describe('homeRefreshState', () => {
+  it('tạo navigation state mới để Home tải lại sau khi bắt đầu task', () => {
+    expect(homeRefreshState(1234)).toEqual({ refreshAt: 1234 })
+  })
 })

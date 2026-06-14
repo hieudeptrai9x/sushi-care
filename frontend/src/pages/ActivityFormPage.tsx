@@ -5,6 +5,7 @@ import { DateTimeInput } from '../components/DateTimeInput'
 import { api } from '../services/api'
 import type { Activity } from '../types'
 import { durationMinutes, toLocalInput } from '../utils/baby'
+import { activityStatus, type ActivityStatus } from '../utils/activity'
 import { useToast } from '../context/ToastContext'
 
 const config = {
@@ -35,11 +36,13 @@ export function ActivityFormPage() {
   const [poopTexture, setPoopTexture] = useState('soft')
   const [note, setNote] = useState('')
   const [busy, setBusy] = useState(false)
+  const [loadedStatus, setLoadedStatus] = useState<ActivityStatus>('completed')
   const duration = useMemo(() => end ? durationMinutes(start, end) : Number(minutes || 0), [start, end, minutes])
 
   useEffect(() => {
     if (!activityId) return
     api.get<Activity>(`/api/activities/get.php?id=${activityId}`).then((activity) => {
+      setLoadedStatus(activityStatus(activity))
       setSubtype(activity.subtype || (type === 'feeding' ? 'breast_direct' : ''))
       setStart(activity.start_time.replace(' ', 'T').slice(0, 16))
       setEnd(activity.end_time ? activity.end_time.replace(' ', 'T').slice(0, 16) : toLocalInput())
@@ -95,7 +98,7 @@ export function ActivityFormPage() {
       <Field label={type === 'sleep' ? 'Giờ bắt đầu' : 'Thời gian'}><DateTimeInput value={start} onChange={setStart} required /></Field>
       {type === 'sleep' && <><Field label="Giờ thức dậy"><DateTimeInput value={end} onChange={setEnd} required /></Field><div className="duration-chip">Tổng thời gian: <strong>{duration} phút</strong></div></>}
       <Field label="Ghi chú"><textarea rows={3} placeholder="Bé có điều gì đặc biệt không?" value={note} onChange={(e) => setNote(e.target.value)} /></Field>
-      <button className="primary-button" disabled={busy}>{busy ? 'Đang lưu...' : activityId ? 'Hoàn tất nhật ký' : 'Lưu nhật ký'}</button>
+      <button className="primary-button" disabled={busy}>{busy ? 'Đang lưu...' : activityId ? loadedStatus === 'paused' ? 'Hoàn tất nhật ký' : 'Cập nhật nhật ký' : 'Lưu nhật ký'}</button>
     </form>
   </div>
 }

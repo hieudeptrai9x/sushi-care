@@ -30,4 +30,22 @@ final class Auth
             Response::error('Phiên làm việc không hợp lệ. Vui lòng tải lại trang.', 419);
         }
     }
+
+    public static function role(): string
+    {
+        if (!empty($_SESSION['role'])) {
+            return (string) $_SESSION['role'];
+        }
+        $stmt = \db()->prepare('SELECT role FROM users WHERE id=? LIMIT 1');
+        $stmt->execute([self::userId()]);
+        $_SESSION['role'] = (string) ($stmt->fetchColumn() ?: '');
+        return (string) $_SESSION['role'];
+    }
+
+    public static function requireAdmin(): void
+    {
+        if (self::role() !== 'admin') {
+            Response::error('Chỉ tài khoản quản trị được sử dụng chức năng này.', 403);
+        }
+    }
 }

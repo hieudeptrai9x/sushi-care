@@ -21,7 +21,7 @@ $babyId = baby_id($userId);
 if (AiSafety::isEmergency($message)) {
     $reply = AiSafety::emergencyMessage();
 } else {
-    $settings = AiSettings::load(db(), $userId, $config['app_key']);
+    $settings = AiSettings::load(db(), baby_owner_id($babyId), $config['app_key']);
     if ($settings['enabled'] !== '1' || $settings['api_key'] === '') {
         Response::error('AI chưa được bật hoặc chưa có API key.', 422);
     }

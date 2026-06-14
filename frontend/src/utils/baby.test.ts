@@ -27,19 +27,19 @@ describe('local date and time fields', () => {
 })
 
 describe('feedingGuidance', () => {
-  it('hướng dẫn 30-60 ml trong những ngày đầu', () => {
+  it('tách bú mẹ trực tiếp khỏi lượng sữa bú bình', () => {
     expect(feedingGuidance('2026-06-11', new Date('2026-06-14T12:00:00'))).toMatchObject({
-      amount: '30–60 ml/cữ',
-      cadence: 'mỗi 2–3 giờ',
+      bottleAmount: '60–90 ml/cữ',
+      breastfeedingCadence: '8–12 cữ/24 giờ',
     })
   })
 
   it('hướng dẫn 90-120 ml khi gần hết tháng đầu', () => {
-    expect(feedingGuidance('2026-05-16', new Date('2026-06-14T12:00:00')).amount).toBe('90–120 ml/cữ')
+    expect(feedingGuidance('2026-05-16', new Date('2026-06-14T12:00:00')).bottleAmount).toBe('90–120 ml/cữ')
   })
 
   it('hướng dẫn 180-240 ml khi bé khoảng 6 tháng', () => {
-    expect(feedingGuidance('2025-12-14', new Date('2026-06-14T12:00:00')).amount).toBe('180–240 ml/cữ')
+    expect(feedingGuidance('2025-12-14', new Date('2026-06-14T12:00:00')).bottleAmount).toBe('180–240 ml/cữ')
   })
 })
 

@@ -31,10 +31,11 @@ export function JournalPage() {
     await api.post('/api/activities/stop.php', { id: activity.id })
     navigate(`/add/${activity.type}?activity=${activity.id}`)
   }
+  const edit = (activity: Activity) => navigate(activity.type === 'health' ? `/health?activity=${activity.id}` : `/add/${activity.type}?activity=${activity.id}`)
   return <div className="page-pad journal-page">
     <PageHeader title="Nhật ký của bé" subtitle="MỖI NGÀY MỘT CÂU CHUYỆN" />
     <input className="date-picker" type="date" value={date} onChange={(e) => setDate(e.target.value)} />
     <div className="filter-row">{filters.map(([key, label]) => <button className={filter === key ? 'active' : ''} onClick={() => setFilter(key)} key={key}>{label}</button>)}</div>
-    {loading ? <Loading /> : items.length ? <div className="card timeline-card">{items.map((item) => <ActivityCard key={item.id} activity={item} onDelete={remove} onStop={stop} onComplete={(activity) => navigate(`/add/${activity.type}?activity=${activity.id}`)} />)}</div> : <EmptyState title="Một ngày thật nhẹ nhàng" text="Chưa có hoạt động nào trong ngày này." />}
+    {loading ? <Loading /> : items.length ? <div className="card timeline-card">{items.map((item) => <ActivityCard key={item.id} activity={item} onDelete={remove} onEdit={edit} onStop={stop} onComplete={edit} />)}</div> : <EmptyState title="Một ngày thật nhẹ nhàng" text="Chưa có hoạt động nào trong ngày này." />}
   </div>
 }

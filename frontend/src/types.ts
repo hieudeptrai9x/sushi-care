@@ -35,6 +35,7 @@ export type Activity = {
   weight_kg?: number
   meta_json?: string | Record<string, unknown>
   note?: string
+  creator_name?: string
 }
 
 export type TodayStats = {

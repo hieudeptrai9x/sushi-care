@@ -24,6 +24,7 @@ if (!$user || !password_verify((string) $data['password'], $user['password_hash'
 
 session_regenerate_id(true);
 $_SESSION['user_id'] = (int) $user['id'];
+$_SESSION['role'] = (string) $user['role'];
 unset($user['password_hash']);
 $user['csrf_token'] = Auth::csrfToken();
 Response::json($user);

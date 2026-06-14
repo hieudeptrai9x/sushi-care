@@ -7,6 +7,7 @@ require_once dirname(__DIR__) . '/bootstrap.php';
 use SushiCare\Lib\Auth;
 
 $userId = Auth::userId();
+Auth::requireAdmin();
 $babyId = baby_id($userId);
 $baby = db()->prepare('SELECT name,nickname,birth_date,gender,avatar_url,birth_weight,birth_length,note,created_at,updated_at FROM babies WHERE id=?');
 $baby->execute([$babyId]);

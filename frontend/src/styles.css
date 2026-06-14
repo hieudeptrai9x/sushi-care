@@ -266,4 +266,13 @@ input[type="datetime-local"]::-webkit-date-and-time-value{text-align:left}
 .settings-group button strong{color:#493e44}
 .settings-group button em{margin-left:auto;font-size:8px;font-style:normal;color:#9b8d95;background:#f4eff2;padding:4px 7px;border-radius:20px}
 .settings-group button>svg{margin-left:auto}
+.activity-actions{display:flex;align-items:center;justify-content:flex-end}
+.timeline-item:has(.activity-actions){grid-template-columns:39px 35px minmax(0,1fr) auto}
+.caregiver-list{margin-top:16px;padding:18px;display:grid;gap:10px}
+.caregiver-list h2{font-size:15px;margin:0 0 4px}
+.caregiver-list article{display:flex;align-items:center;gap:10px;padding:10px 0;border-top:1px solid var(--line)}
+.caregiver-list article>span{width:36px;height:36px;border-radius:13px;background:var(--pink-soft);color:var(--pink);display:grid;place-items:center;font-weight:800}
+.caregiver-list article>div{display:grid;gap:2px}
+.caregiver-list article strong{font-size:11px}
+.caregiver-list article small{font-size:9px;color:var(--muted)}
 @media(max-width:360px){.date-time-grid{grid-template-columns:1fr}.segment button{min-width:72px}}

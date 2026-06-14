@@ -12,6 +12,7 @@ use SushiCare\Lib\Validator;
 
 require_method('POST');
 $userId = Auth::userId();
+Auth::requireAdmin();
 Auth::verifyCsrf();
 $data = input();
 $current = AiSettings::load(db(), $userId, $config['app_key']);

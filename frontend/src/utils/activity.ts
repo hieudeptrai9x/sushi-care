@@ -22,6 +22,13 @@ export function feedingLabel(subtype?: string): string {
   } as Record<string, string>)[subtype ?? ''] ?? 'Bú'
 }
 
+export function runningLabel(activity: Activity): string {
+  if (activity.subtype === 'pump') return 'Đang hút sữa'
+  if (activity.type === 'feeding') return 'Đang bú'
+  if (activity.type === 'sleep') return 'Đang ngủ'
+  return 'Đang theo dõi'
+}
+
 export function activityMeta(activity: Activity): Record<string, unknown> {
   if (!activity.meta_json) return {}
   try {

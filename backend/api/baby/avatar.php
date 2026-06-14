@@ -34,8 +34,9 @@ if (!is_dir($config['upload_dir']) && !mkdir($config['upload_dir'], 0755, true) 
     throw new RuntimeException('Không thể tạo thư mục upload.');
 }
 
-$current = db()->prepare('SELECT avatar_url FROM babies WHERE user_id=? LIMIT 1');
-$current->execute([$userId]);
+$babyId = baby_id($userId);
+$current = db()->prepare('SELECT avatar_url FROM babies WHERE id=? LIMIT 1');
+$current->execute([$babyId]);
 $oldUrl = (string) ($current->fetchColumn() ?: '');
 $name = 'avatar-' . bin2hex(random_bytes(16)) . '.' . $allowed[$mime];
 $target = $config['upload_dir'] . '/' . $name;
@@ -45,8 +46,8 @@ if (!move_uploaded_file($file['tmp_name'], $target)) {
 
 $basePath = rtrim(dirname((string) ($_SERVER['SCRIPT_NAME'] ?? ''), 3), '/');
 $url = $basePath . '/uploads/' . $name;
-$stmt = db()->prepare('UPDATE babies SET avatar_url=? WHERE user_id=?');
-$stmt->execute([$url, $userId]);
+$stmt = db()->prepare('UPDATE babies SET avatar_url=? WHERE id=?');
+$stmt->execute([$url, $babyId]);
 
 if (str_starts_with($oldUrl, $basePath . '/uploads/avatar-')) {
     $oldPath = $config['upload_dir'] . '/' . basename($oldUrl);

@@ -11,7 +11,7 @@ require_method('POST');
 $userId = Auth::userId();
 Auth::verifyCsrf();
 $data = input();
-$stmt = db()->prepare('UPDATE reminders SET title=?,reminder_type=?,reminder_time=?,repeat_rule=?,note=?,is_done=? WHERE id=? AND user_id=?');
+$stmt = db()->prepare('UPDATE reminders SET title=?,reminder_type=?,reminder_time=?,repeat_rule=?,note=?,is_done=? WHERE id=? AND baby_id=?');
 $stmt->execute([
     trim((string) ($data['title'] ?? '')),
     $data['reminder_type'] ?? 'other',
@@ -20,6 +20,6 @@ $stmt->execute([
     $data['note'] ?? null,
     !empty($data['is_done']) ? 1 : 0,
     (int) ($data['id'] ?? 0),
-    $userId,
+    baby_id($userId),
 ]);
 Response::json(['message' => 'Đã cập nhật nhắc nhở.']);

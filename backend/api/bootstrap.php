@@ -66,11 +66,47 @@ function require_method(string $method): void
 
 function baby_id(int $userId): int
 {
-    $stmt = db()->prepare('SELECT id FROM babies WHERE user_id = ? ORDER BY id LIMIT 1');
-    $stmt->execute([$userId]);
+    ensure_shared_care_schema();
+    $stmt = db()->prepare(
+        'SELECT b.id FROM babies b
+         LEFT JOIN baby_caregivers bc ON bc.baby_id=b.id AND bc.user_id=?
+         WHERE b.user_id=? OR bc.user_id=?
+         ORDER BY b.id LIMIT 1'
+    );
+    $stmt->execute([$userId, $userId, $userId]);
     $id = (int) $stmt->fetchColumn();
     if ($id < 1) {
         throw new RuntimeException('Chưa có hồ sơ bé.');
     }
     return $id;
+}
+
+function ensure_shared_care_schema(): void
+{
+    static $ready = false;
+    if ($ready) {
+        return;
+    }
+    db()->exec(
+        'CREATE TABLE IF NOT EXISTS baby_caregivers (
+            baby_id BIGINT UNSIGNED NOT NULL,
+            user_id BIGINT UNSIGNED NOT NULL,
+            created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            PRIMARY KEY (baby_id,user_id),
+            CONSTRAINT fk_baby_caregivers_baby FOREIGN KEY (baby_id) REFERENCES babies(id) ON DELETE CASCADE,
+            CONSTRAINT fk_baby_caregivers_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci'
+    );
+    $ready = true;
+}
+
+function baby_owner_id(int $babyId): int
+{
+    $stmt = db()->prepare('SELECT user_id FROM babies WHERE id=? LIMIT 1');
+    $stmt->execute([$babyId]);
+    $ownerId = (int) $stmt->fetchColumn();
+    if ($ownerId < 1) {
+        throw new RuntimeException('Không tìm thấy tài khoản quản trị của bé.');
+    }
+    return $ownerId;
 }

@@ -19,7 +19,7 @@ if (!$birthDate) {
 }
 $gender = in_array($data['gender'] ?? '', ['female', 'male', 'other'], true) ? $data['gender'] : 'other';
 $stmt = db()->prepare(
-    'UPDATE babies SET name=?, nickname=?, birth_date=?, gender=?, birth_weight=?, birth_length=?, note=? WHERE user_id=?'
+    'UPDATE babies SET name=?, nickname=?, birth_date=?, gender=?, birth_weight=?, birth_length=?, note=? WHERE id=?'
 );
 $stmt->execute([
     $name,
@@ -29,6 +29,6 @@ $stmt->execute([
     Validator::decimal($data['birth_weight'] ?? null),
     Validator::decimal($data['birth_length'] ?? null),
     trim((string) ($data['note'] ?? '')) ?: null,
-    $userId,
+    baby_id($userId),
 ]);
 Response::json(['message' => 'Đã lưu hồ sơ bé.']);

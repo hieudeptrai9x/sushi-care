@@ -1,6 +1,6 @@
 import { Bell, Bot, CalendarDays, ChevronRight, Droplets, Info, Milk, MoonStar, Scale } from 'lucide-react'
 import { useEffect, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useLocation, useNavigate } from 'react-router-dom'
 import { ActivityCard } from '../components/ActivityCard'
 import { Loading } from '../components/Loading'
 import { api } from '../services/api'
@@ -10,6 +10,7 @@ import { useToast } from '../context/ToastContext'
 
 export function HomePage() {
   const navigate = useNavigate()
+  const location = useLocation()
   const toast = useToast()
   const [baby, setBaby] = useState<Baby | null>(null)
   const [stats, setStats] = useState<TodayStats | null>(null)
@@ -28,7 +29,7 @@ export function HomePage() {
       setBaby(babyData); setStats(statsData); setActivities(activityData); setReminders(reminderData)
     }).finally(() => setLoading(false))
   }
-  useEffect(() => { void load() }, [])
+  useEffect(() => { void load() }, [location.key])
 
   const start = async (type: 'feeding' | 'sleep') => {
     const result = await api.post<{ id: number; already_running: boolean }>('/api/activities/start.php', { type })
@@ -47,9 +48,9 @@ export function HomePage() {
       <div className="home-top"><div className="baby-avatar">{baby?.avatar_url ? <img src={baby.avatar_url} /> : '🍣'}</div><div><small>Chào buổi sáng</small><h1>{baby?.name ?? 'Bé Sushi'}</h1><p>{baby ? calculateAge(baby.birth_date) : ''}</p></div><button className="icon-button glass notification-button" onClick={() => navigate('/reminders')} aria-label="Mở nhắc nhở"><Bell />{reminders.some((item) => !item.is_done) && <i />}</button></div>
       {milkGuide && <div className="feeding-guide">
         <div className="feeding-guide-icon"><Milk /></div>
-        <div><small>GỢI Ý SỮA CÔNG THỨC THEO TUỔI</small><strong>{milkGuide.amount}</strong><span>{milkGuide.cadence} · Nguồn {milkGuide.source}</span></div>
-        <a className="feeding-source" href="https://www.cdc.gov/infant-toddler-nutrition/formula-feeding/how-much-and-how-often.html" target="_blank" rel="noreferrer" aria-label="Xem nguồn hướng dẫn của CDC"><Info /></a>
-        <p>{milkGuide.note} Ưu tiên tín hiệu đói/no và hướng dẫn của bác sĩ.</p>
+        <div><small>ĐỘ TUỔI NÀY {baby?.name.toUpperCase()} CẦN BÚ</small><strong>{milkGuide.bottleAmount}</strong><span>Bú bình · {milkGuide.bottleCadence}</span></div>
+        <a className="feeding-source" href="https://www.healthychildren.org/English/ages-stages/baby/feeding-nutrition/Pages/Bottle-Feeding-How-Its-Done.aspx" target="_blank" rel="noreferrer" aria-label="Xem nguồn hướng dẫn của AAP"><Info /></a>
+        <p><b>Bú mẹ trực tiếp:</b> {milkGuide.breastfeedingCadence}, không quy đổi chính xác thành ml. {milkGuide.note} Nguồn {milkGuide.source}.</p>
       </div>}
     </header>
     <div className="page-pad home-body">

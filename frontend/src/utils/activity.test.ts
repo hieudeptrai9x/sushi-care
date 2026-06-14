@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { activityStatus, feedingLabel, pumpSummary } from './activity'
+import { activityStatus, feedingLabel, pumpSummary, runningLabel } from './activity'
 import type { Activity } from '../types'
 
 const activity = (meta_json?: string): Activity => ({
@@ -42,5 +42,13 @@ describe('pumpSummary', () => {
       amount_ml: 75,
       meta_json: '{"left_ml":40,"right_ml":35}',
     })).toBe('18 phút · Trái 40 ml · Phải 35 ml · Tổng 75 ml')
+  })
+})
+
+describe('runningLabel', () => {
+  it('uses the actual care action instead of a generic running label', () => {
+    expect(runningLabel(activity())).toBe('Đang bú')
+    expect(runningLabel({ ...activity(), subtype: 'pump' })).toBe('Đang hút sữa')
+    expect(runningLabel({ ...activity(), type: 'sleep' })).toBe('Đang ngủ')
   })
 })

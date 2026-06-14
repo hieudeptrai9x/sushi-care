@@ -14,5 +14,6 @@ $user = $stmt->fetch();
 if (!$user) {
     Response::error('Tài khoản không tồn tại.', 401);
 }
+$_SESSION['role'] = (string) $user['role'];
 $user['csrf_token'] = Auth::csrfToken();
 Response::json($user);

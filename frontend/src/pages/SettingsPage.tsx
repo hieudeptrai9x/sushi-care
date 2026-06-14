@@ -12,15 +12,14 @@ type SettingItem = {
   disabled?: boolean
 }
 
-const groups: SettingItem[][] = [
-  [{ label: 'Hồ sơ bé', icon: Baby, route: '/baby' }, { label: 'Người chăm sóc', icon: Users, disabled: true }, { label: 'Đổi mật khẩu', icon: KeyRound, route: '/change-password' }, { label: 'Cài đặt nhắc nhở', icon: Bell, route: '/reminders' }],
-  [{ label: 'AI Settings', icon: Bot, route: '/ai-settings' }, { label: 'Tải bản sao dữ liệu', icon: Database, action: 'backup' }, { label: 'Cài đặt chung', icon: Settings2, disabled: true }],
-  [{ label: 'Trợ giúp & Liên hệ', icon: CircleHelp, action: 'help' }, { label: 'Giới thiệu ứng dụng', icon: Info, action: 'about' }],
-]
-
 export function SettingsPage() {
   const navigate = useNavigate(), { user, logout } = useAuth()
   const toast = useToast()
+  const groups: SettingItem[][] = [
+    [{ label: 'Hồ sơ bé', icon: Baby, route: '/baby' }, ...(user?.role === 'admin' ? [{ label: 'Người chăm sóc', icon: Users, route: '/caregivers' }] : []), { label: 'Đổi mật khẩu', icon: KeyRound, route: '/change-password' }, { label: 'Cài đặt nhắc nhở', icon: Bell, route: '/reminders' }],
+    [...(user?.role === 'admin' ? [{ label: 'AI Settings', icon: Bot, route: '/ai-settings' }, { label: 'Tải bản sao dữ liệu', icon: Database, action: 'backup' as const }] : []), { label: 'Cài đặt chung', icon: Settings2, disabled: true }],
+    [{ label: 'Trợ giúp & Liên hệ', icon: CircleHelp, action: 'help' }, { label: 'Giới thiệu ứng dụng', icon: Info, action: 'about' }],
+  ]
   const runAction = (action?: string) => {
     if (action === 'backup') window.location.href = `${import.meta.env.BASE_URL}api/settings/export.php`
     if (action === 'help') window.location.href = 'mailto:codex@leminhhieu.com?subject=Hỗ trợ Sushi Care'

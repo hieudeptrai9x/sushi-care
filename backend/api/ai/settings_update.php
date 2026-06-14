@@ -11,6 +11,7 @@ use SushiCare\Lib\Validator;
 
 require_method('POST');
 $userId = Auth::userId();
+Auth::requireAdmin();
 Auth::verifyCsrf();
 $data = input();
 if (!in_array($data['provider'] ?? '', ['openai-compatible', 'openai', 'openrouter', 'custom'], true)) {

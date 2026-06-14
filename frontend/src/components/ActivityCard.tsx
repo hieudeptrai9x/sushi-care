@@ -1,7 +1,7 @@
 import { Baby, HeartPulse, MoonStar, Pencil, Square, StickyNote, Trash2 } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import type { Activity } from '../types'
-import { activityStatus, feedingLabel, pumpSummary } from '../utils/activity'
+import { activityStatus, feedingLabel, pumpSummary, runningLabel } from '../utils/activity'
 import { formatDuration } from '../utils/baby'
 
 const labels: Record<string, string> = { feeding: 'Bú', sleep: 'Ngủ', diaper: 'Tã', health: 'Sức khỏe', note: 'Ghi chú' }
@@ -17,9 +17,10 @@ function detail(activity: Activity) {
   return activity.note || 'Đã ghi nhận'
 }
 
-export function ActivityCard({ activity, onDelete, onStop, onComplete }: {
+export function ActivityCard({ activity, onDelete, onEdit, onStop, onComplete }: {
   activity: Activity
   onDelete?: (id: number) => void
+  onEdit?: (activity: Activity) => void
   onStop?: (activity: Activity) => void
   onComplete?: (activity: Activity) => void
 }) {
@@ -36,9 +37,9 @@ export function ActivityCard({ activity, onDelete, onStop, onComplete }: {
   return <article className={`timeline-item ${activity.type} ${status !== 'completed' ? `activity-${status}` : ''}`}>
     <time>{date.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })}</time>
     <div className={`timeline-icon ${status === 'running' ? 'is-spinning' : ''}`}><Icon /></div>
-    <div className="timeline-copy"><strong>{labels[activity.type]}{status === 'running' ? ' · Đang chạy' : status === 'paused' ? ' · Chờ hoàn tất' : ''}</strong><span>{status !== 'completed' ? formatDuration(liveMinutes) : detail(activity)}</span>{activity.note && activity.type !== 'note' && <small>{activity.note}</small>}</div>
+    <div className="timeline-copy"><strong>{status === 'running' ? runningLabel(activity) : `${labels[activity.type]}${status === 'paused' ? ' · Chờ hoàn tất' : ''}`}</strong><span>{status !== 'completed' ? formatDuration(liveMinutes) : detail(activity)}</span>{activity.note && activity.type !== 'note' && <small>{activity.note}</small>}{activity.creator_name && <small>Ghi bởi {activity.creator_name}</small>}</div>
     {status === 'running' && onStop ? <button className="activity-control stop" onClick={() => onStop(activity)} aria-label="Dừng"><Square /></button>
       : status === 'paused' && onComplete ? <button className="activity-control" onClick={() => onComplete(activity)} aria-label="Hoàn tất"><Pencil /></button>
-        : onDelete && <button className="subtle-button danger-text" onClick={() => onDelete(activity.id)} aria-label="Xóa"><Trash2 /></button>}
+        : <div className="activity-actions">{onEdit && <button className="subtle-button" onClick={() => onEdit(activity)} aria-label="Sửa"><Pencil /></button>}{onDelete && <button className="subtle-button danger-text" onClick={() => onDelete(activity.id)} aria-label="Xóa"><Trash2 /></button>}</div>}
   </article>
 }

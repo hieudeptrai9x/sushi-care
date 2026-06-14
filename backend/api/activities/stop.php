@@ -11,8 +11,9 @@ require_method('POST');
 $userId = Auth::userId();
 Auth::verifyCsrf();
 $id = (int) (input()['id'] ?? 0);
-$stmt = db()->prepare('SELECT start_time,meta_json FROM activities WHERE id=? AND user_id=? LIMIT 1');
-$stmt->execute([$id, $userId]);
+$babyId = baby_id($userId);
+$stmt = db()->prepare('SELECT start_time,meta_json FROM activities WHERE id=? AND baby_id=? LIMIT 1');
+$stmt->execute([$id, $babyId]);
 $activity = $stmt->fetch();
 if (!$activity) {
     Response::error('Không tìm thấy hoạt động.', 404);
@@ -22,6 +23,6 @@ $duration = max(0, (int) round((strtotime($end) - strtotime((string) $activity['
 $meta = json_decode((string) ($activity['meta_json'] ?? ''), true);
 $meta = is_array($meta) ? $meta : [];
 $meta['status'] = 'paused';
-$update = db()->prepare('UPDATE activities SET end_time=?,duration_minutes=?,meta_json=? WHERE id=? AND user_id=?');
-$update->execute([$end, $duration, json_encode($meta, JSON_UNESCAPED_UNICODE), $id, $userId]);
+$update = db()->prepare('UPDATE activities SET end_time=?,duration_minutes=?,meta_json=? WHERE id=? AND baby_id=?');
+$update->execute([$end, $duration, json_encode($meta, JSON_UNESCAPED_UNICODE), $id, $babyId]);
 Response::json(['id' => $id, 'end_time' => $end, 'duration_minutes' => $duration]);

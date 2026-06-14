@@ -13,6 +13,7 @@ import { LoginPage } from './pages/LoginPage'
 import { RemindersPage } from './pages/RemindersPage'
 import { SettingsPage } from './pages/SettingsPage'
 import { ChangePasswordPage } from './pages/ChangePasswordPage'
+import { CaregiversPage } from './pages/CaregiversPage'
 
 function Protected() {
   const { user, loading } = useAuth()
@@ -28,7 +29,8 @@ function Protected() {
     <Route path="/add/:type" element={<ActivityFormPage />} />
     <Route path="/health" element={<HealthPage />} />
     <Route path="/ai" element={<AiChatPage />} />
-    <Route path="/ai-settings" element={<AiSettingsPage />} />
+    <Route path="/ai-settings" element={user.role === 'admin' ? <AiSettingsPage /> : <Navigate to="/settings" replace />} />
+    <Route path="/caregivers" element={user.role === 'admin' ? <CaregiversPage /> : <Navigate to="/settings" replace />} />
     <Route path="*" element={<Navigate to="/" replace />} />
   </Routes></AppShell>
 }
