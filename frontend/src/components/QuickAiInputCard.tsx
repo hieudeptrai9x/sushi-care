@@ -1,11 +1,11 @@
-import { Bot, ChevronDown, Send, Sparkles } from 'lucide-react'
+import { Bot, Send, Sparkles } from 'lucide-react'
 import { useState, type FormEvent } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useToast } from '../context/ToastContext'
 import { quickAiService, type QuickActivity, type QuickParseResult } from '../services/quickAiService'
 import { AiClarificationSheet } from './AiClarificationSheet'
 import { AiParseConfirmSheet } from './AiParseConfirmSheet'
-import { AnimatedPlaceholder, quickAiExamples } from './AnimatedPlaceholder'
+import { AnimatedPlaceholder } from './AnimatedPlaceholder'
 import { appendClarification } from '../utils/quickAiInput'
 
 export function QuickAiInputCard({ babyId, onSaved }: { babyId: number; onSaved: () => Promise<unknown> }) {
@@ -14,7 +14,6 @@ export function QuickAiInputCard({ babyId, onSaved }: { babyId: number; onSaved:
   const [text, setText] = useState('')
   const [loading, setLoading] = useState(false)
   const [saving, setSaving] = useState(false)
-  const [examplesOpen, setExamplesOpen] = useState(false)
   const [result, setResult] = useState<QuickParseResult | null>(null)
 
   const parse = async (input: string) => {
@@ -79,13 +78,12 @@ export function QuickAiInputCard({ babyId, onSaved }: { babyId: number; onSaved:
       <div className="quick-ai-heading"><div className="quick-ai-orb"><Sparkles /></div><div><h2>Ghi nhanh bằng AI</h2><p>Nhập như đang nhắn tin, app sẽ tự hiểu và lưu nhật ký cho bé.</p></div></div>
       <form onSubmit={submit}>
         <div className="quick-ai-input-wrap">
-          <textarea aria-label="Nội dung ghi nhanh bằng AI" rows={2} value={text} onChange={(event) => setText(event.target.value)} />
+          <textarea aria-label="Nội dung ghi nhanh bằng AI" rows={1} value={text} onChange={(event) => setText(event.target.value)} />
           <AnimatedPlaceholder hidden={text.length > 0} />
           <button aria-label="Gửi cho AI" disabled={loading || !text.trim()}>{loading ? <Bot className="is-thinking" /> : <Send />}</button>
         </div>
       </form>
-      <div className="quick-ai-footer"><span>{loading ? 'AI đang đọc nhật ký...' : 'AI sẽ hỏi lại nếu thông tin chưa rõ.'}</span><button onClick={() => setExamplesOpen((value) => !value)}>Xem ví dụ <ChevronDown /></button></div>
-      {examplesOpen && <div className="quick-ai-examples">{quickAiExamples.map((example) => <button key={example} onClick={() => { setText(example); setExamplesOpen(false) }}>{example}</button>)}</div>}
+      {loading && <div className="quick-ai-footer"><span>AI đang đọc nhật ký...</span></div>}
     </section>
     {result?.success && result.activity && <AiParseConfirmSheet activity={result.activity} summary={result.human_summary} warning={result.warning} saving={saving} onSave={save} onEdit={edit} onCancel={() => setResult(null)} />}
     {result?.needs_clarification && <AiClarificationSheet question={result.question ?? 'Anh bổ sung thêm chút nhé.'} suggestions={result.suggestions ?? []} onSuggestion={clarify} onCancel={() => setResult(null)} onManual={manual} />}

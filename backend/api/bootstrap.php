@@ -5,6 +5,8 @@ declare(strict_types=1);
 use SushiCare\Config\Database;
 use SushiCare\Lib\Response;
 
+date_default_timezone_set('Asia/Ho_Chi_Minh');
+
 $sessionLifetime = 60 * 60 * 24 * 30;
 ini_set('session.gc_maxlifetime', (string) $sessionLifetime);
 ini_set('session.cookie_lifetime', (string) $sessionLifetime);

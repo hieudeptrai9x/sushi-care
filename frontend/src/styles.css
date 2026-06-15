@@ -284,27 +284,24 @@ input[type="datetime-local"]::-webkit-date-and-time-value{text-align:left}
 .stat-card .stat-copy{gap:1px}
 .stat-card strong{font-size:9px;margin:0;letter-spacing:-.15px}
 .stat-card .stat-copy>span{font-size:8px;color:var(--muted)}
-.quick-ai-card{padding:15px;border-color:#ffe4ec;background:linear-gradient(145deg,#fff,#fff7fa);box-shadow:none}
+.quick-ai-card{padding:12px;border-color:#ffe4ec;background:linear-gradient(145deg,#fff,#fff7fa);box-shadow:none}
 .quick-ai-heading{display:flex;align-items:center;gap:10px}
 .quick-ai-heading h2{font-size:15px;margin:0 0 3px}
 .quick-ai-heading p{font-size:9px;line-height:1.5;color:var(--muted);margin:0}
-.quick-ai-orb,.ai-sheet-icon{flex:0 0 auto;width:39px;height:39px;border-radius:14px;background:linear-gradient(135deg,#ff5f8f,#ff8fb1);color:white;display:grid;place-items:center}
+.quick-ai-orb,.ai-sheet-icon{flex:0 0 auto;width:35px;height:35px;border-radius:13px;background:linear-gradient(135deg,#ff5f8f,#ff8fb1);color:white;display:grid;place-items:center}
 .quick-ai-orb svg,.ai-sheet-icon svg{width:19px}
-.quick-ai-card form{margin-top:12px}
+.quick-ai-card form{margin-top:8px}
 .quick-ai-input-wrap{position:relative;display:grid;grid-template-columns:minmax(0,1fr) 40px;align-items:end;border:1px solid #ffe4ec;border-radius:18px;background:#fff6f9;padding:7px}
 .quick-ai-input-wrap:focus-within{border-color:#ff91b3;box-shadow:0 0 0 3px #ffe5ed}
-.quick-ai-input-wrap textarea{position:relative;z-index:1;min-height:58px;padding:9px;border:0;background:transparent;box-shadow:none;resize:none;font-size:14px;line-height:1.45}
+.quick-ai-input-wrap textarea{position:relative;z-index:1;min-height:44px;height:44px;padding:10px 9px;border:0;background:transparent;box-shadow:none;resize:none;font-size:14px;line-height:1.45}
 .quick-ai-input-wrap textarea:focus{box-shadow:none}
 .quick-ai-input-wrap>button{width:38px;height:38px;border:0;border-radius:13px;background:linear-gradient(135deg,#ff5f8f,#ff8fb1);color:#fff;display:grid;place-items:center;margin-bottom:2px}
 .quick-ai-input-wrap>button svg{width:18px}
-.animated-placeholder{position:absolute;z-index:0;left:16px;right:54px;top:17px;color:#b78595;font-size:12px;line-height:1.45;pointer-events:none;animation:placeholderSwap 2.8s ease both}
+.animated-placeholder{position:absolute;z-index:0;left:16px;right:54px;top:15px;color:#b78595;font-size:12px;line-height:1.45;pointer-events:none;animation:placeholderSwap 2.8s ease both}
 @keyframes placeholderSwap{0%{opacity:0;transform:translateY(5px)}12%,86%{opacity:1;transform:none}100%{opacity:0;transform:translateY(-5px)}}
-.quick-ai-footer{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-top:8px}
+.quick-ai-footer{margin-top:7px}
 .quick-ai-footer span{font-size:8px;color:var(--muted)}
-.quick-ai-footer button{border:0;background:transparent;color:var(--pink);font-size:8px;font-weight:700;display:flex;align-items:center;gap:2px;padding:4px}
-.quick-ai-footer svg{width:13px}
-.quick-ai-examples{display:flex;gap:6px;overflow:auto;margin-top:7px;padding-bottom:2px}
-.quick-ai-examples button,.ai-suggestion-list button{white-space:nowrap;border:1px solid #ffd5e1;background:#fff;color:#b24769;border-radius:20px;padding:7px 9px;font-size:8px}
+.ai-suggestion-list button{white-space:nowrap;border:1px solid #ffd5e1;background:#fff;color:#b24769;border-radius:20px;padding:7px 9px;font-size:8px}
 .is-thinking{animation:activityPulse 1.2s ease-in-out infinite}
 .ai-sheet-backdrop{z-index:80}
 .ai-confirm-sheet{max-height:90dvh;overflow:auto;display:grid;gap:10px}
@@ -323,4 +320,6 @@ input[type="datetime-local"]::-webkit-date-and-time-value{text-align:left}
 .ai-cancel-button{border:0;background:transparent;color:var(--muted);padding:8px;font-size:10px}
 .ai-question{font-size:12px;line-height:1.5}
 .ai-suggestion-list{display:flex;gap:7px;overflow:auto}
+.journal-safe-bottom{padding-bottom:calc(132px + env(safe-area-inset-bottom))}
+.reminder-actions{display:flex;align-items:center;flex:0 0 auto}
 @media(max-width:360px){.date-time-grid{grid-template-columns:1fr}.segment button{min-width:72px}}

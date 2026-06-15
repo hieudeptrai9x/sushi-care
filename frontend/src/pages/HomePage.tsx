@@ -8,7 +8,7 @@ import { api } from '../services/api'
 import type { Activity, Baby, Reminder, TodayStats } from '../types'
 import { calculateAge, feedingGuidance, formatDuration } from '../utils/baby'
 import { useToast } from '../context/ToastContext'
-import { formatVietnameseDateTime } from '../utils/dateTime'
+import { formatVietnameseDateTime, vietnamDate } from '../utils/dateTime'
 
 export function HomePage() {
   const navigate = useNavigate()
@@ -19,19 +19,28 @@ export function HomePage() {
   const [activities, setActivities] = useState<Activity[]>([])
   const [reminders, setReminders] = useState<Reminder[]>([])
   const [loading, setLoading] = useState(true)
+  const [today, setToday] = useState(vietnamDate)
 
   const load = () => {
-    const today = new Date().toISOString().slice(0, 10)
     return Promise.all([
       api.get<Baby>('/api/baby/get.php'),
-      api.get<TodayStats>('/api/stats/today.php'),
+      api.get<TodayStats>(`/api/stats/today.php?date=${today}`),
       api.get<Activity[]>(`/api/activities/list.php?date=${today}&type=all`),
       api.get<Reminder[]>('/api/reminders/list.php'),
     ]).then(([babyData, statsData, activityData, reminderData]) => {
       setBaby(babyData); setStats(statsData); setActivities(activityData); setReminders(reminderData)
     }).finally(() => setLoading(false))
   }
-  useEffect(() => { void load() }, [location.key])
+  useEffect(() => {
+    const refreshDate = () => setToday(vietnamDate())
+    const timer = window.setInterval(refreshDate, 60_000)
+    document.addEventListener('visibilitychange', refreshDate)
+    return () => {
+      window.clearInterval(timer)
+      document.removeEventListener('visibilitychange', refreshDate)
+    }
+  }, [])
+  useEffect(() => { void load() }, [location.key, today])
 
   const start = async (type: 'feeding' | 'sleep') => {
     const result = await api.post<{ id: number; already_running: boolean }>('/api/activities/start.php', { type })
@@ -66,7 +75,6 @@ export function HomePage() {
           <Stat icon={<Scale />} tone="yellow" label="Cân nặng" value={stats?.weight.current ? `${stats.weight.current} kg` : 'Chưa có'} sub={stats?.weight.change ? `${stats.weight.change > 0 ? '+' : ''}${stats.weight.change} kg` : 'Ghi lần đầu'} onClick={() => navigate('/health')} />
         </div>
       </section>
-      {baby && <QuickAiInputCard babyId={baby.id} onSaved={load} />}
       <button className="ai-banner" onClick={() => navigate('/ai')}>
         <div className="robot-orb"><Bot /></div><div><small>TRỢ LÝ RIÊNG CỦA MẸ</small><strong>AI hỏi nhanh 24/7</strong><span>Hỏi về giấc ngủ, dinh dưỡng và chăm sóc bé...</span></div><ChevronRight />
       </button>
@@ -77,6 +85,7 @@ export function HomePage() {
       <section className="card wellbeing-card">
         <div className="wellbeing-icon">💗</div><div><small>BÉ HÔM NAY THẾ NÀO?</small><p>Hôm nay bé bú <b>{stats?.feeding.count ?? 0} lần</b>, ngủ <b>{formatDuration(stats?.sleep.minutes ?? 0)}</b> và có <b>{(stats?.diaper.wet ?? 0) + (stats?.diaper.dirty ?? 0)} lượt tã</b>. Chưa ghi nhận dấu hiệu bất thường.</p></div>
       </section>
+      {baby && <QuickAiInputCard babyId={baby.id} onSaved={load} />}
       <section>
         <div className="section-title"><h2>Lịch & nhắc nhở</h2><button onClick={() => navigate('/reminders')}>Mở lịch</button></div>
         <div className="reminder-strip">{reminders.filter((item) => !item.is_done).slice(0, 3).map((item) => <article key={item.id}><CalendarDays /><div><strong>{item.title}</strong><span>{formatVietnameseDateTime(item.reminder_time)}</span></div></article>)}

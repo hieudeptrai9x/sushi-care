@@ -1,4 +1,5 @@
 import { api } from './api'
+import { vietnamDate } from '../utils/dateTime'
 
 export type QuickActivity = {
   type: 'feeding' | 'sleep' | 'diaper' | 'health' | 'pumping' | 'note'
@@ -29,17 +30,12 @@ export type QuickParseResult = {
   suggestions?: string[]
 }
 
-function localDate(): string {
-  const now = new Date()
-  return new Date(now.getTime() - now.getTimezoneOffset() * 60_000).toISOString().slice(0, 10)
-}
-
 export const quickAiService = {
   parseQuickInput: (text: string, babyId: number) => api.post<QuickParseResult>('/api/ai/quick_parse.php', {
     baby_id: babyId,
     text,
     timezone: 'Asia/Ho_Chi_Minh',
-    today: localDate(),
+    today: vietnamDate(),
   }),
   createActivityFromAi: (activity: QuickActivity, originalText: string, babyId: number) => api.post<{ id: number }>('/api/activities/create_from_ai.php', {
     baby_id: babyId,
