@@ -18,6 +18,10 @@ describe('Home dashboard layout', () => {
     expect(quickInputSource).not.toContain('AI sẽ hỏi lại nếu thông tin chưa rõ.')
   })
 
+  it('marks the AI textarea as safe from iOS focus zoom', () => {
+    expect(quickInputSource).toContain('className="ios-no-zoom-input"')
+  })
+
   it('uses the Vietnam date for timeline and stats requests', () => {
     expect(homeSource).toContain('vietnamDate()')
     expect(homeSource).toContain('/api/stats/today.php?date=${today}')

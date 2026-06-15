@@ -78,7 +78,7 @@ export function QuickAiInputCard({ babyId, onSaved }: { babyId: number; onSaved:
       <div className="quick-ai-heading"><div className="quick-ai-orb"><Sparkles /></div><div><h2>Ghi nhanh bằng AI</h2><p>Nhập như đang nhắn tin, app sẽ tự hiểu và lưu nhật ký cho bé.</p></div></div>
       <form onSubmit={submit}>
         <div className="quick-ai-input-wrap">
-          <textarea aria-label="Nội dung ghi nhanh bằng AI" rows={1} value={text} onChange={(event) => setText(event.target.value)} />
+          <textarea className="ios-no-zoom-input" aria-label="Nội dung ghi nhanh bằng AI" rows={1} value={text} onChange={(event) => setText(event.target.value)} />
           <AnimatedPlaceholder hidden={text.length > 0} />
           <button aria-label="Gửi cho AI" disabled={loading || !text.trim()}>{loading ? <Bot className="is-thinking" /> : <Send />}</button>
         </div>

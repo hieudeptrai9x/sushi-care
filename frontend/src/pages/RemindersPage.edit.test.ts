@@ -7,4 +7,9 @@ describe('Reminder editing', () => {
     expect(source).toContain("editingId ? '/api/reminders/update.php' : '/api/reminders/create.php'")
     expect(source).toContain('Sửa nhắc nhở')
   })
+
+  it('uses the compact event row without changing the rest of the calendar', () => {
+    expect(source).toContain("className={`reminder-row compact-reminder-row")
+    expect(source).toContain('className="reminder-actions"')
+  })
 })
