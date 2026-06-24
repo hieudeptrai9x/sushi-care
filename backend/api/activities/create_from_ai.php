@@ -56,4 +56,9 @@ $activity['user_id'] = $userId;
 $fields = array_keys($activity);
 $stmt = db()->prepare('INSERT INTO activities (' . implode(',', $fields) . ') VALUES (' . implode(',', array_fill(0, count($fields), '?')) . ')');
 $stmt->execute(array_values($activity));
-Response::json(['id' => (int) db()->lastInsertId(), 'activity' => $activity, 'message' => 'Đã lưu nhật ký cho bé.'], 201);
+$prediction = null;
+if ($activity['type'] === 'feeding' && $activity['subtype'] !== 'pump') {
+    ensure_feeding_prediction_schema();
+    $prediction = \SushiCare\Lib\FeedingPredictionService::refreshForBaby(db(), $babyId);
+}
+Response::json(['id' => (int) db()->lastInsertId(), 'activity' => $activity, 'message' => 'Đã lưu nhật ký cho bé.', 'prediction' => $prediction], 201);

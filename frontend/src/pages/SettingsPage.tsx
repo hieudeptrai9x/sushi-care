@@ -1,4 +1,4 @@
-import { Baby, Bell, Bot, ChevronRight, CircleHelp, Database, Info, KeyRound, LogOut, Settings2, Users } from 'lucide-react'
+import { Baby, Bell, Bot, ChevronRight, CircleHelp, Database, Info, KeyRound, LogOut, Milk, Settings2, Users } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { PageHeader } from '../components/AppShell'
 import { useAuth } from '../context/AuthContext'
@@ -16,7 +16,7 @@ export function SettingsPage() {
   const navigate = useNavigate(), { user, logout } = useAuth()
   const toast = useToast()
   const groups: SettingItem[][] = [
-    [{ label: 'Hồ sơ bé', icon: Baby, route: '/baby' }, ...(user?.role === 'admin' ? [{ label: 'Người chăm sóc', icon: Users, route: '/caregivers' }] : []), { label: 'Đổi mật khẩu', icon: KeyRound, route: '/change-password' }, { label: 'Cài đặt nhắc nhở', icon: Bell, route: '/reminders' }],
+    [{ label: 'Hồ sơ bé', icon: Baby, route: '/baby' }, ...(user?.role === 'admin' ? [{ label: 'Người chăm sóc', icon: Users, route: '/caregivers' }] : []), { label: 'Đổi mật khẩu', icon: KeyRound, route: '/change-password' }, { label: 'Cài đặt nhắc nhở', icon: Bell, route: '/reminders' }, { label: 'Nhắc hâm sữa', icon: Milk, route: '/feeding-reminders' }],
     [...(user?.role === 'admin' ? [{ label: 'AI Settings', icon: Bot, route: '/ai-settings' }, { label: 'Tải bản sao dữ liệu', icon: Database, action: 'backup' as const }] : []), { label: 'Cài đặt chung', icon: Settings2, disabled: true }],
     [{ label: 'Trợ giúp & Liên hệ', icon: CircleHelp, action: 'help' }, { label: 'Giới thiệu ứng dụng', icon: Info, action: 'about' }],
   ]

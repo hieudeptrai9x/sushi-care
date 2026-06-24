@@ -60,9 +60,92 @@ final class ActivityService
         return $result;
     }
 
+    public static function summarizeForDay(array $rows, string $dayStart, string $dayEnd, ?string $now = null): array
+    {
+        $result = [
+            'feeding' => ['count' => 0, 'total_ml' => 0.0, 'minutes' => 0],
+            'sleep' => ['count' => 0, 'minutes' => 0],
+            'diaper' => ['wet' => 0, 'dirty' => 0],
+        ];
+        $now ??= date('Y-m-d H:i:s');
+
+        foreach ($rows as $row) {
+            $meta = json_decode((string) ($row['meta_json'] ?? ''), true);
+            if (in_array($meta['status'] ?? '', ['running', 'paused'], true)) {
+                continue;
+            }
+
+            $isTimed = ($row['end_time'] ?? null) || in_array($meta['status'] ?? '', ['running', 'paused'], true);
+            $clippedMinutes = $isTimed
+                ? self::clippedMinutes(
+                    (string) ($row['start_time'] ?? ''),
+                    (string) (($row['end_time'] ?? null) ?: $now),
+                    $dayStart,
+                    $dayEnd
+                )
+                : (int) ($row['duration_minutes'] ?? 0);
+
+            if ($row['type'] === 'feeding') {
+                $result['feeding']['count']++;
+                $result['feeding']['total_ml'] += (float) ($row['amount_ml'] ?? 0);
+                $result['feeding']['minutes'] += $clippedMinutes;
+            } elseif ($row['type'] === 'sleep') {
+                $result['sleep']['count']++;
+                $result['sleep']['minutes'] += $clippedMinutes;
+            } elseif ($row['type'] === 'diaper') {
+                $subtype = $row['subtype'] ?? '';
+                $result['diaper']['wet'] += in_array($subtype, ['wet', 'mixed'], true) ? 1 : 0;
+                $result['diaper']['dirty'] += in_array($subtype, ['dirty', 'mixed'], true) ? 1 : 0;
+            }
+        }
+
+        return $result;
+    }
+
+    public static function dayWindow(string $date): array
+    {
+        $date = preg_match('/^\d{4}-\d{2}-\d{2}$/', $date) ? $date : date('Y-m-d');
+        $start = date('Y-m-d 00:00:00', strtotime($date));
+        $end = date('Y-m-d 00:00:00', strtotime($start . ' +1 day'));
+
+        return [$start, $end];
+    }
+
+    public static function dateOverlapSql(string $alias = ''): string
+    {
+        $prefix = $alias !== '' ? $alias . '.' : '';
+
+        return $prefix . 'start_time < ? AND ('
+            . $prefix . 'end_time >= ? OR DATE(' . $prefix . 'start_time)=? OR ('
+            . $prefix . 'end_time IS NULL AND ? >= ? AND ('
+            . $prefix . 'meta_json LIKE ? OR ' . $prefix . 'meta_json LIKE ?)))';
+    }
+
+    public static function dateOverlapParams(string $dayStart, string $dayEnd, string $date, ?string $now = null): array
+    {
+        return [$dayEnd, $dayStart, $date, $now ?? date('Y-m-d H:i:s'), $dayStart, '%"status":"running"%', '%"status":"paused"%'];
+    }
+
     public static function elapsedMinutes(string $start, string $end): int
     {
         return max(0, (int) ceil((strtotime($end) - strtotime($start)) / 60));
+    }
+
+    private static function clippedMinutes(string $start, string $end, string $dayStart, string $dayEnd): int
+    {
+        $startTs = strtotime($start);
+        $endTs = strtotime($end);
+        $dayStartTs = strtotime($dayStart);
+        $dayEndTs = strtotime($dayEnd);
+
+        if ($startTs === false || $endTs === false || $dayStartTs === false || $dayEndTs === false) {
+            return 0;
+        }
+
+        $overlapStart = max($startTs, $dayStartTs);
+        $overlapEnd = min($endTs, $dayEndTs);
+
+        return max(0, (int) ceil(($overlapEnd - $overlapStart) / 60));
     }
 
     private static function dateTime(mixed $value): string

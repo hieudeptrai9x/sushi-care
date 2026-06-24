@@ -58,6 +58,21 @@ bash scripts/package-deploy.sh
 7. Vào **Thêm → Hồ sơ bé** để cập nhật thông tin và đổi mật khẩu admin sau lần cài đặt đầu.
 8. Vào **Thêm → AI Settings**, nhập Base URL, model và API key, bấm **Test kết nối**, sau đó bật AI và lưu.
 
+## Dự đoán cữ bú và email nhắc hâm sữa
+
+- Prediction chạy hoàn toàn bằng PHP, không gọi AI/API và vẫn hoạt động khi AI bị tắt.
+- Vào **Thêm → Hồ sơ bé** chọn loại nuôi, sau đó vào **Thêm → Nhắc hâm sữa** để nhập email và thời gian nhắc.
+- Tài khoản admin cấu hình SMTP tại cùng màn hình. Khuyến nghị dùng TLS cổng `587`; mật khẩu SMTP được mã hóa bằng `appKey`.
+- Email gửi mặc định từ `Sushi Care <sushi@leminhhieu.com>` và có thể đổi trong phần SMTP.
+- Cài PHPMailer khi deploy thủ công bằng `composer install --no-dev --optimize-autoloader` trong thư mục app. Gói deploy từ `scripts/package-deploy.sh` đã kèm `vendor`.
+- Tạo cron trong cPanel chạy mỗi 5 phút:
+
+```cron
+*/5 * * * * /usr/local/bin/php /home/CPANEL_USER/public_html/baby-care/cron/check-feeding-reminders.php >/dev/null 2>&1
+```
+
+Thay `CPANEL_USER` và đường dẫn PHP theo tài khoản cPanel. Cron chỉ chạy bằng CLI, truy cập qua web sẽ trả `404`.
+
 ## Cấu hình AI
 
 Mặc định:

@@ -18,8 +18,13 @@ if (!$birthDate) {
     Response::error('Ngày sinh không hợp lệ.', 422);
 }
 $gender = in_array($data['gender'] ?? '', ['female', 'male', 'other'], true) ? $data['gender'] : 'other';
+$feedingType = (string) ($data['feeding_type'] ?? 'mixed');
+if (!in_array($feedingType, ['breast_direct', 'breast_bottle', 'formula', 'mixed'], true)) {
+    Response::error('Loại nuôi không hợp lệ.', 422);
+}
+ensure_feeding_prediction_schema();
 $stmt = db()->prepare(
-    'UPDATE babies SET name=?, nickname=?, birth_date=?, gender=?, birth_weight=?, birth_length=?, note=? WHERE id=?'
+    'UPDATE babies SET name=?, nickname=?, birth_date=?, gender=?, birth_weight=?, birth_length=?, feeding_type=?, note=? WHERE id=?'
 );
 $stmt->execute([
     $name,
@@ -28,6 +33,7 @@ $stmt->execute([
     $gender,
     Validator::decimal($data['birth_weight'] ?? null),
     Validator::decimal($data['birth_length'] ?? null),
+    $feedingType,
     trim((string) ($data['note'] ?? '')) ?: null,
     baby_id($userId),
 ]);

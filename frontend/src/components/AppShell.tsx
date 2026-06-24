@@ -13,7 +13,7 @@ const quickActions = [
   ['Ghi chú', 'note', '✍️'],
 ]
 
-const focusRoutes = ['/health', '/baby', '/change-password', '/ai', '/ai-settings', '/caregivers']
+const focusRoutes = ['/health', '/baby', '/change-password', '/ai', '/ai-settings', '/caregivers', '/feeding-reminders']
 
 export function homeRefreshState(now = Date.now()) {
   return { refreshAt: now }

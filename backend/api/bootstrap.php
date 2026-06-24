@@ -21,6 +21,9 @@ session_set_cookie_params([
 session_start();
 
 require_once dirname(__DIR__) . '/config/database.php';
+if (is_file(dirname(__DIR__) . '/vendor/autoload.php')) {
+    require_once dirname(__DIR__) . '/vendor/autoload.php';
+}
 
 spl_autoload_register(function (string $class): void {
     $prefix = 'SushiCare\\';
@@ -111,4 +114,9 @@ function baby_owner_id(int $babyId): int
         throw new RuntimeException('Không tìm thấy tài khoản quản trị của bé.');
     }
     return $ownerId;
+}
+
+function ensure_feeding_prediction_schema(): void
+{
+    \SushiCare\Lib\FeedingSchema::ensure(db());
 }

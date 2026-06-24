@@ -11,6 +11,7 @@ describe('isFocusRoute', () => {
     '/change-password',
     '/ai-settings',
     '/ai',
+    '/feeding-reminders',
   ])('hides the main navigation on %s', (pathname) => {
     expect(isFocusRoute(pathname)).toBe(true)
   })

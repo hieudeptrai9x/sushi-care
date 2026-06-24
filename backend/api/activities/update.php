@@ -25,4 +25,9 @@ if ($stmt->rowCount() < 1) {
         Response::error('Không tìm thấy hoạt động.', 404);
     }
 }
-Response::json(['message' => 'Đã cập nhật nhật ký.']);
+$prediction = null;
+if ($activity['type'] === 'feeding' && $activity['subtype'] !== 'pump') {
+    ensure_feeding_prediction_schema();
+    $prediction = \SushiCare\Lib\FeedingPredictionService::refreshForBaby(db(), $babyId);
+}
+Response::json(['message' => 'Đã cập nhật nhật ký.', 'prediction' => $prediction]);

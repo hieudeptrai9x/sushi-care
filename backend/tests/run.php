@@ -7,11 +7,17 @@ require_once __DIR__ . '/../lib/AiSafety.php';
 require_once __DIR__ . '/../lib/Secret.php';
 require_once __DIR__ . '/../lib/ActivityService.php';
 require_once __DIR__ . '/../lib/QuickInputParser.php';
+require_once __DIR__ . '/../lib/FeedingPredictionService.php';
+require_once __DIR__ . '/../lib/FeedingReminderSettings.php';
+require_once __DIR__ . '/../lib/EmailReminderService.php';
 
 use SushiCare\Lib\ActivityService;
 use SushiCare\Lib\AiSafety;
 use SushiCare\Lib\Secret;
 use SushiCare\Lib\Validator;
+use SushiCare\Lib\FeedingPredictionService;
+use SushiCare\Lib\FeedingReminderSettings;
+use SushiCare\Lib\EmailReminderService;
 
 function assertSameValue(mixed $expected, mixed $actual, string $message): void
 {
@@ -68,6 +74,58 @@ assertSameValue(120.0, $summary['feeding']['total_ml'], 'Tổng ml');
 assertSameValue(90, $summary['sleep']['minutes'], 'Tổng ngủ');
 assertSameValue(1, $summary['diaper']['wet'], 'Tã ướt từ mixed');
 assertSameValue(1, $summary['diaper']['dirty'], 'Tã bẩn từ mixed');
+
+[$dayStart, $dayEnd] = ActivityService::dayWindow('2026-06-16');
+assertSameValue('2026-06-16 00:00:00', $dayStart, 'Mốc đầu ngày');
+assertSameValue('2026-06-17 00:00:00', $dayEnd, 'Mốc cuối ngày');
+assertSameValue(
+    'a.start_time < ? AND (a.end_time >= ? OR DATE(a.start_time)=? OR (a.end_time IS NULL AND ? >= ? AND (a.meta_json LIKE ? OR a.meta_json LIKE ?)))',
+    ActivityService::dateOverlapSql('a'),
+    'SQL lọc activity giao với ngày đang xem'
+);
+assertSameValue(
+    ['2026-06-17 00:00:00', '2026-06-16 00:00:00', '2026-06-16', '2026-06-16 02:00:00', '2026-06-16 00:00:00', '%"status":"running"%', '%"status":"paused"%'],
+    ActivityService::dateOverlapParams($dayStart, $dayEnd, '2026-06-16', '2026-06-16 02:00:00'),
+    'Params lọc activity giao ngày'
+);
+
+$overnightSummary = ActivityService::summarizeForDay([
+    [
+        'type' => 'sleep',
+        'subtype' => null,
+        'start_time' => '2026-06-15 23:00:00',
+        'end_time' => '2026-06-16 01:00:00',
+        'duration_minutes' => 120,
+        'amount_ml' => null,
+        'meta_json' => '{}',
+    ],
+], $dayStart, $dayEnd, '2026-06-16 02:00:00');
+assertSameValue(1, $overnightSummary['sleep']['count'], 'Ngủ qua ngày vẫn được tính ở ngày mới');
+assertSameValue(60, $overnightSummary['sleep']['minutes'], 'Ngủ qua ngày chỉ tính phần giao với ngày mới');
+
+$prediction = FeedingPredictionService::calculate([
+    ['start_time' => '2026-06-15 00:15:00', 'subtype' => 'formula', 'meta_json' => '{}'],
+    ['start_time' => '2026-06-15 03:00:00', 'subtype' => 'breast_bottle', 'meta_json' => '{}'],
+    ['start_time' => '2026-06-15 05:40:00', 'subtype' => 'breast_direct', 'meta_json' => '{}'],
+    ['start_time' => '2026-06-15 08:25:00', 'subtype' => 'formula', 'meta_json' => '{}'],
+], new DateTimeImmutable('2026-06-15 08:30:00'));
+assertSameValue('2026-06-15 11:08:00', $prediction['predicted_time'], 'Dự đoán cữ bú kế tiếp theo khoảng cách có trọng số');
+assertSameValue(163, $prediction['average_interval_minutes'], 'Khoảng cách trung bình có trọng số');
+assertSameValue(true, $prediction['confidence'] >= 60, 'Độ tin cậy đủ dùng khi có bốn cữ');
+
+$withoutPump = FeedingPredictionService::calculate([
+    ['start_time' => '2026-06-15 06:00:00', 'subtype' => 'formula', 'meta_json' => '{}'],
+    ['start_time' => '2026-06-15 07:00:00', 'subtype' => 'pump', 'meta_json' => '{}'],
+    ['start_time' => '2026-06-15 09:00:00', 'subtype' => 'formula', 'meta_json' => '{}'],
+], new DateTimeImmutable('2026-06-15 09:05:00'));
+assertSameValue(180, $withoutPump['average_interval_minutes'], 'Hút sữa không được tính là cữ bé bú');
+
+$tooLittleData = FeedingPredictionService::calculate([
+    ['start_time' => '2026-06-15 06:00:00', 'subtype' => 'formula', 'meta_json' => '{}'],
+], new DateTimeImmutable('2026-06-15 06:05:00'));
+assertSameValue(null, $tooLittleData, 'Một cữ chưa đủ để dự đoán');
+assertSameValue(['a@example.com', 'b@example.com'], FeedingReminderSettings::emails('a@example.com, b@example.com; a@example.com'), 'Chuẩn hóa danh sách email');
+assertSameValue(true, EmailReminderService::closing(2) !== '', 'Câu kết email được tạo bằng code');
 
 require __DIR__ . '/QuickInputParserTest.php';
 

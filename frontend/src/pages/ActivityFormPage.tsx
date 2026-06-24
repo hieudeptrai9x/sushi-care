@@ -3,7 +3,7 @@ import { useEffect, useMemo, useState, type FormEvent } from 'react'
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import { DateTimeInput } from '../components/DateTimeInput'
 import { api } from '../services/api'
-import type { Activity } from '../types'
+import type { Activity, FeedingPrediction } from '../types'
 import { durationMinutes, toLocalInput } from '../utils/baby'
 import { activityStatus, type ActivityStatus, usesRecordedDuration } from '../utils/activity'
 import { useToast } from '../context/ToastContext'
@@ -19,6 +19,7 @@ export function ActivityFormPage() {
   const { type = 'feeding' } = useParams()
   const [searchParams] = useSearchParams()
   const activityId = Number(searchParams.get('activity') || 0)
+  const adjustStart = searchParams.get('adjustStart') === '1'
   const navigate = useNavigate()
   const toast = useToast()
   const current = config[type as keyof typeof config] ?? config.feeding
@@ -88,6 +89,12 @@ export function ActivityFormPage() {
   const submit = async (event: FormEvent) => {
     event.preventDefault(); setBusy(true)
     try {
+      if (adjustStart && activityId) {
+        await api.post('/api/activities/update_running_start.php', { id: activityId, start_time: start })
+        toast('Đã cập nhật giờ bắt đầu')
+        navigate('/')
+        return
+      }
       const pumpTotal = Number(leftAmount || 0) + Number(rightAmount || 0)
       const payload = {
         id: activityId || undefined,
@@ -96,8 +103,13 @@ export function ActivityFormPage() {
         poop_color: poopColor, poop_texture: poopTexture, note,
         meta: { ...draftMeta, status: 'completed', ...(subtype === 'pump' ? { left_ml: Number(leftAmount || 0), right_ml: Number(rightAmount || 0) } : {}) },
       }
-      await api.post(activityId ? '/api/activities/update.php' : '/api/activities/create.php', payload)
-      toast('Đã lưu vào nhật ký của bé')
+      const result = await api.post<{ prediction?: FeedingPrediction }>(activityId ? '/api/activities/update.php' : '/api/activities/create.php', payload)
+      toast(type === 'feeding' ? '🍼 Đã lưu cữ bú' : 'Đã lưu vào nhật ký của bé')
+      if (type === 'feeding' && subtype !== 'pump' && result.prediction) {
+        window.setTimeout(() => toast(`🤖 Sushi có thể sẽ đói lại vào khoảng ${result.prediction!.predicted_time.slice(11, 16)}`), 900)
+        const reminder = await api.get<{ reminder_enabled: boolean; minutes_before: number }>('/api/feeding/prediction.php')
+        if (reminder.reminder_enabled) window.setTimeout(() => toast(`📧 Sẽ gửi email nhắc hâm sữa trước ${reminder.minutes_before} phút`), 1800)
+      }
       navigate('/')
     } catch (error) { toast(error instanceof Error ? error.message : 'Không thể lưu.') } finally { setBusy(false) }
   }
@@ -105,7 +117,8 @@ export function ActivityFormPage() {
   return <div className="page-pad form-page">
     <header className="form-header"><button className="icon-button" onClick={() => navigate(-1)}><ArrowLeft /></button><div className="form-illustration"><Icon /></div><div><small>GHI NHANH</small><h1>{current.title}</h1></div></header>
     <form className="card entry-form" onSubmit={submit}>
-      {type === 'feeding' && <>
+      {adjustStart && <div className="duration-chip">Task vẫn tiếp tục chạy. Chỉ chỉnh lại mốc bắt đầu khi mình lỡ bấm trễ.</div>}
+      {!adjustStart && type === 'feeding' && <>
         <Segment value={subtype} onChange={setSubtype} items={[['breast_direct', 'Bú trực tiếp'], ['breast_bottle', 'Sữa mẹ bình'], ['formula', 'Sữa công thức'], ['pump', 'Hút sữa']]} />
         {(subtype === 'formula' || subtype === 'breast_bottle') && <Field label="Lượng bé đã bú (ml)"><input type="number" inputMode="numeric" min="1" max="1000" value={amount} onChange={(e) => setAmount(e.target.value)} required /></Field>}
         {subtype === 'breast_direct' && <><Field label="Bên bú"><select value={side} onChange={(e) => setSide(e.target.value)}><option value="left">Bên trái</option><option value="right">Bên phải</option><option value="both">Cả hai bên</option></select></Field>
@@ -117,16 +130,16 @@ export function ActivityFormPage() {
           <div className="duration-chip pump-total">Tổng lượng: <strong>{Number(leftAmount || 0) + Number(rightAmount || 0)} ml</strong></div>
         </>}
       </>}
-      {type === 'diaper' && <>
+      {!adjustStart && type === 'diaper' && <>
         <Segment value={subtype} onChange={setSubtype} items={[['wet', 'Tã ướt'], ['dirty', 'Tã bẩn'], ['mixed', 'Tã lẫn']]} />
         <Field label="Mức độ ướt"><select value={wetLevel} onChange={(e) => setWetLevel(e.target.value)}><option value="low">Ít</option><option value="medium">Vừa</option><option value="high">Nhiều</option></select></Field>
         {subtype !== 'wet' && <div className="two-cols"><Field label="Màu phân"><select value={poopColor} onChange={(e) => setPoopColor(e.target.value)}><option value="yellow">Vàng</option><option value="green">Xanh</option><option value="brown">Nâu</option><option value="black">Đen</option><option value="red">Đỏ</option></select></Field><Field label="Kết cấu"><select value={poopTexture} onChange={(e) => setPoopTexture(e.target.value)}><option value="soft">Sệt</option><option value="liquid">Lỏng</option><option value="hard">Cứng</option><option value="mucus">Có nhầy</option></select></Field></div>}
       </>}
       <Field label={type === 'sleep' ? 'Giờ bắt đầu' : 'Thời gian'}><DateTimeInput value={start} onChange={setStart} required /></Field>
-      {type === 'feeding' && recordedDuration && <Field label="Thời gian kết thúc"><DateTimeInput value={end} onChange={setEnd} required /></Field>}
-      {type === 'sleep' && <><Field label="Giờ thức dậy"><DateTimeInput value={end} onChange={setEnd} required /></Field><div className="duration-chip">Tổng thời gian: <strong>{duration} phút</strong></div></>}
-      <Field label="Ghi chú"><textarea rows={3} placeholder="Bé có điều gì đặc biệt không?" value={note} onChange={(e) => setNote(e.target.value)} /></Field>
-      <button className="primary-button" disabled={busy}>{busy ? 'Đang lưu...' : activityId ? loadedStatus === 'paused' ? 'Hoàn tất nhật ký' : 'Cập nhật nhật ký' : 'Lưu nhật ký'}</button>
+      {!adjustStart && type === 'feeding' && recordedDuration && <Field label="Thời gian kết thúc"><DateTimeInput value={end} onChange={setEnd} required /></Field>}
+      {!adjustStart && type === 'sleep' && <><Field label="Giờ thức dậy"><DateTimeInput value={end} onChange={setEnd} required /></Field><div className="duration-chip">Tổng thời gian: <strong>{duration} phút</strong></div></>}
+      {!adjustStart && <Field label="Ghi chú"><textarea rows={3} placeholder="Bé có điều gì đặc biệt không?" value={note} onChange={(e) => setNote(e.target.value)} /></Field>}
+      <button className="primary-button" disabled={busy}>{busy ? 'Đang lưu...' : adjustStart ? 'Cập nhật giờ bắt đầu' : activityId ? loadedStatus === 'paused' ? 'Hoàn tất nhật ký' : 'Cập nhật nhật ký' : 'Lưu nhật ký'}</button>
     </form>
   </div>
 }

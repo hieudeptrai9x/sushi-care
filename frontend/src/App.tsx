@@ -14,6 +14,7 @@ import { RemindersPage } from './pages/RemindersPage'
 import { SettingsPage } from './pages/SettingsPage'
 import { ChangePasswordPage } from './pages/ChangePasswordPage'
 import { CaregiversPage } from './pages/CaregiversPage'
+import { FeedingReminderSettingsPage } from './pages/FeedingReminderSettingsPage'
 
 function Protected() {
   const { user, loading } = useAuth()
@@ -26,6 +27,7 @@ function Protected() {
     <Route path="/settings" element={<SettingsPage />} />
     <Route path="/baby" element={<BabyProfilePage />} />
     <Route path="/change-password" element={<ChangePasswordPage />} />
+    <Route path="/feeding-reminders" element={<FeedingReminderSettingsPage />} />
     <Route path="/add/:type" element={<ActivityFormPage />} />
     <Route path="/health" element={<HealthPage />} />
     <Route path="/ai" element={<AiChatPage />} />

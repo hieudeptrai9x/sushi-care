@@ -21,6 +21,7 @@ CREATE TABLE IF NOT EXISTS babies (
   avatar_url VARCHAR(500) NULL,
   birth_weight DECIMAL(5,2) NULL,
   birth_length DECIMAL(5,2) NULL,
+  feeding_type VARCHAR(30) NOT NULL DEFAULT 'mixed',
   note TEXT NULL,
   created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
@@ -116,6 +117,32 @@ CREATE TABLE IF NOT EXISTS ai_messages (
   INDEX idx_ai_messages_baby_time (baby_id, created_at),
   CONSTRAINT fk_ai_messages_baby FOREIGN KEY (baby_id) REFERENCES babies(id) ON DELETE CASCADE,
   CONSTRAINT fk_ai_messages_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS feeding_predictions (
+  id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  baby_id BIGINT UNSIGNED NOT NULL,
+  predicted_time DATETIME NOT NULL,
+  confidence TINYINT UNSIGNED NOT NULL,
+  average_interval_minutes INT UNSIGNED NOT NULL,
+  created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  INDEX idx_feeding_predictions_baby_time (baby_id, predicted_time),
+  CONSTRAINT fk_feeding_predictions_baby FOREIGN KEY (baby_id) REFERENCES babies(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS email_reminders (
+  id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  baby_id BIGINT UNSIGNED NOT NULL,
+  reminder_type VARCHAR(50) NOT NULL,
+  scheduled_at DATETIME NOT NULL,
+  sent_at DATETIME NULL,
+  email VARCHAR(190) NOT NULL,
+  status VARCHAR(30) NOT NULL DEFAULT 'pending',
+  meta_json JSON NULL,
+  created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  UNIQUE KEY uniq_feeding_email (baby_id, reminder_type, scheduled_at, email),
+  INDEX idx_email_reminders_due (status, scheduled_at),
+  CONSTRAINT fk_email_reminders_baby FOREIGN KEY (baby_id) REFERENCES babies(id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- Tạo hash bằng: php -r "echo password_hash('MAT_KHAU_MOI', PASSWORD_DEFAULT), PHP_EOL;"

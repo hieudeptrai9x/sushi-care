@@ -37,7 +37,7 @@ export const quickAiService = {
     timezone: 'Asia/Ho_Chi_Minh',
     today: vietnamDate(),
   }),
-  createActivityFromAi: (activity: QuickActivity, originalText: string, babyId: number) => api.post<{ id: number }>('/api/activities/create_from_ai.php', {
+  createActivityFromAi: (activity: QuickActivity, originalText: string, babyId: number) => api.post<{ id: number; prediction?: import('../types').FeedingPrediction }>('/api/activities/create_from_ai.php', {
     baby_id: babyId,
     activity,
     original_text: originalText,

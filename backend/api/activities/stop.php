@@ -12,7 +12,7 @@ $userId = Auth::userId();
 Auth::verifyCsrf();
 $id = (int) (input()['id'] ?? 0);
 $babyId = baby_id($userId);
-$stmt = db()->prepare('SELECT start_time,meta_json FROM activities WHERE id=? AND baby_id=? LIMIT 1');
+$stmt = db()->prepare('SELECT type,subtype,start_time,meta_json FROM activities WHERE id=? AND baby_id=? LIMIT 1');
 $stmt->execute([$id, $babyId]);
 $activity = $stmt->fetch();
 if (!$activity) {
@@ -25,4 +25,9 @@ $meta = is_array($meta) ? $meta : [];
 $meta['status'] = 'paused';
 $update = db()->prepare('UPDATE activities SET end_time=?,duration_minutes=?,meta_json=? WHERE id=? AND baby_id=?');
 $update->execute([$end, $duration, json_encode($meta, JSON_UNESCAPED_UNICODE), $id, $babyId]);
-Response::json(['id' => $id, 'end_time' => $end, 'duration_minutes' => $duration]);
+$prediction = null;
+if ($activity['type'] === 'feeding' && $activity['subtype'] !== 'pump') {
+    ensure_feeding_prediction_schema();
+    $prediction = \SushiCare\Lib\FeedingPredictionService::refreshForBaby(db(), $babyId);
+}
+Response::json(['id' => $id, 'end_time' => $end, 'duration_minutes' => $duration, 'prediction' => $prediction]);

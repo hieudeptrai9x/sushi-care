@@ -63,6 +63,7 @@ export function BabyProfilePage() {
       <label>Biệt danh<input value={baby.nickname ?? ''} onChange={(e) => change('nickname', e.target.value)} /></label>
       <label>Ngày sinh<input type="date" value={baby.birth_date} onChange={(e) => change('birth_date', e.target.value)} required /></label>
       <label>Giới tính<select value={baby.gender} onChange={(e) => change('gender', e.target.value)}><option value="female">Bé gái</option><option value="male">Bé trai</option><option value="other">Khác</option></select></label>
+      <label>Loại nuôi<select value={baby.feeding_type ?? 'mixed'} onChange={(e) => change('feeding_type', e.target.value)}><option value="breast_direct">Bú mẹ trực tiếp</option><option value="breast_bottle">Sữa mẹ hút ra bình</option><option value="formula">Sữa công thức</option><option value="mixed">Kết hợp</option></select></label>
       <div className="two-cols"><label>Cân nặng lúc sinh (kg)<input type="text" inputMode="decimal" placeholder="Ví dụ 2,7" value={birthWeight} onChange={(e) => setBirthWeight(e.target.value)} /></label><label>Chiều dài (cm)<input type="text" inputMode="decimal" placeholder="Ví dụ 50,5" value={birthLength} onChange={(e) => setBirthLength(e.target.value)} /></label></div>
       <label>Ghi chú<textarea value={baby.note ?? ''} onChange={(e) => change('note', e.target.value)} /></label>
       <button className="primary-button">Lưu hồ sơ</button>

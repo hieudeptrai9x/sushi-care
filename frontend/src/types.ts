@@ -16,7 +16,16 @@ export type Baby = {
   avatar_url?: string
   birth_weight?: number
   birth_length?: number
+  feeding_type?: 'breast_direct' | 'breast_bottle' | 'formula' | 'mixed'
   note?: string
+}
+
+export type FeedingPrediction = {
+  predicted_time: string
+  average_interval_minutes: number
+  confidence: number
+  last_feeding_time: string
+  sample_size: number
 }
 
 export type Activity = {

@@ -44,10 +44,11 @@ export function QuickAiInputCard({ babyId, onSaved }: { babyId: number; onSaved:
     if (!result?.activity) return
     setSaving(true)
     try {
-      await quickAiService.createActivityFromAi(result.activity, text, babyId)
+      const saved = await quickAiService.createActivityFromAi(result.activity, text, babyId)
       setText('')
       setResult(null)
       toast('Đã lưu nhật ký cho bé 💗')
+      if (saved.prediction) window.setTimeout(() => toast(`🤖 Sushi có thể sẽ đói lại vào khoảng ${saved.prediction!.predicted_time.slice(11, 16)}`), 900)
       await onSaved()
     } catch {
       toast('AI đang hơi bận, anh thử lại sau nhé.')

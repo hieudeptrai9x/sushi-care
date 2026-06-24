@@ -1,0 +1,8 @@
+{
+    "name": "leminhhieu/sushi-care",
+    "description": "Private backend services for Sushi Care.",
+    "license": "proprietary",
+    "require": {
+        "phpmailer/phpmailer": "^6.10"
+    }
+}

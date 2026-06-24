@@ -10,7 +10,8 @@ export const setCsrfToken = (token: string) => { csrfToken = token }
 
 export async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
   const base = import.meta.env.BASE_URL.replace(/\/$/, '')
-  const resolvedPath = path.startsWith('/api/') ? `${base}${path}` : path
+  const apiBase = (import.meta.env.VITE_API_BASE_URL || base).replace(/\/$/, '')
+  const resolvedPath = path.startsWith('/api/') ? `${apiBase}${path}` : path
   const headers = new Headers(options.headers)
   if (!(options.body instanceof FormData)) headers.set('Content-Type', 'application/json')
   if (csrfToken && (options.method ?? 'GET') !== 'GET') headers.set('X-CSRF-Token', csrfToken)
