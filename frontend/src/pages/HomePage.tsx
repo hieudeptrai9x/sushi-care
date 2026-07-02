@@ -166,7 +166,13 @@ export function HomePage() {
         <div className="home-v4-section-heading"><h2>Dòng thời gian hôm nay</h2><button onClick={() => navigate('/journal')}>Xem tất cả</button></div>
         <div className="home-v4-timeline card timeline-card">
           {activities.length ? activities.slice(0, 5).map((activity) =>
-            <ActivityCard key={activity.id} activity={activity} onStop={stop} onComplete={(item) => navigate(`/add/${item.type}?activity=${item.id}`)} />
+            <ActivityCard
+              key={activity.id}
+              activity={activity}
+              onEdit={(item) => navigate(`/add/${item.type}?activity=${item.id}&adjustStart=1`)}
+              onStop={stop}
+              onComplete={(item) => navigate(`/add/${item.type}?activity=${item.id}`)}
+            />
           ) : <p className="soft-copy">Chưa có hoạt động hôm nay. Chạm một thẻ phía trên để bắt đầu.</p>}
         </div>
       </section>
