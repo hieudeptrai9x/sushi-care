@@ -144,8 +144,8 @@ export function HomePage() {
 
     <main className="home-v4-body">
       <section className="home-v4-feature-grid">
-        <button className="home-v4-feature feed-feature" onClick={() => start('feeding')}>
-          <div className="home-v4-feature-title"><span>Gợi ý cữ bú tiếp theo</span><ChevronRight /></div>
+        <article className="home-v4-feature feed-feature">
+          <div className="home-v4-feature-title"><span>Gợi ý cữ bú tiếp theo</span></div>
           <div className="home-v4-feed-main">
             <span className="home-v4-bottle"><Milk /></span>
             <div><small>Theo tuổi hiện tại</small><strong>{milkGuide?.bottleAmount.replace('khoảng ', '') ?? '-- ml/cữ'}</strong>
@@ -153,7 +153,7 @@ export function HomePage() {
             </div>
           </div>
           <span className="home-v4-source">Bảng tuổi tham khảo · Vinmec/Medlatec <Info /></span>
-        </button>
+        </article>
         <button className="home-v4-feature ai-feature" onClick={() => navigate('/ai')}>
           <div className="home-v4-feature-title"><span>Sushi AI</span><Sparkles /></div>
           <div className="home-v4-ai-orb"><Bot /></div>
