@@ -104,24 +104,42 @@ assertSameValue(1, $overnightSummary['sleep']['count'], 'Ngủ qua ngày vẫn �
 assertSameValue(60, $overnightSummary['sleep']['minutes'], 'Ngủ qua ngày chỉ tính phần giao với ngày mới');
 
 $prediction = FeedingPredictionService::calculate([
-    ['start_time' => '2026-06-15 00:15:00', 'subtype' => 'formula', 'meta_json' => '{}'],
-    ['start_time' => '2026-06-15 03:00:00', 'subtype' => 'breast_bottle', 'meta_json' => '{}'],
-    ['start_time' => '2026-06-15 05:40:00', 'subtype' => 'breast_direct', 'meta_json' => '{}'],
-    ['start_time' => '2026-06-15 08:25:00', 'subtype' => 'formula', 'meta_json' => '{}'],
+    ['start_time' => '2026-06-15 00:15:00', 'subtype' => 'formula', 'amount_ml' => null, 'meta_json' => '{}'],
+    ['start_time' => '2026-06-15 03:00:00', 'subtype' => 'breast_bottle', 'amount_ml' => null, 'meta_json' => '{}'],
+    ['start_time' => '2026-06-15 05:40:00', 'subtype' => 'breast_direct', 'amount_ml' => null, 'meta_json' => '{}'],
+    ['start_time' => '2026-06-15 08:25:00', 'subtype' => 'formula', 'amount_ml' => null, 'meta_json' => '{}'],
 ], new DateTimeImmutable('2026-06-15 08:30:00'));
 assertSameValue('2026-06-15 11:08:00', $prediction['predicted_time'], 'Dự đoán cữ bú kế tiếp theo khoảng cách có trọng số');
 assertSameValue(163, $prediction['average_interval_minutes'], 'Khoảng cách trung bình có trọng số');
 assertSameValue(true, $prediction['confidence'] >= 60, 'Độ tin cậy đủ dùng khi có bốn cữ');
 
+$largerBottle = FeedingPredictionService::calculate([
+    ['start_time' => '2026-06-15 06:00:00', 'subtype' => 'formula', 'amount_ml' => 60, 'meta_json' => '{}'],
+    ['start_time' => '2026-06-15 08:30:00', 'subtype' => 'breast_bottle', 'amount_ml' => 60, 'meta_json' => '{}'],
+    ['start_time' => '2026-06-15 11:00:00', 'subtype' => 'formula', 'amount_ml' => 60, 'meta_json' => '{}'],
+    ['start_time' => '2026-06-15 13:30:00', 'subtype' => 'formula', 'amount_ml' => 90, 'meta_json' => '{}'],
+], new DateTimeImmutable('2026-06-15 13:35:00'));
+assertSameValue(45, $largerBottle['volume_adjustment_minutes'], 'Cữ nhiều ml hơn trung bình kéo cữ kế tiếp xa hơn có giới hạn');
+assertSameValue('2026-06-15 16:45:00', $largerBottle['predicted_time'], 'Dự đoán có điều chỉnh theo lượng sữa vừa bú');
+
+$smallerBottle = FeedingPredictionService::calculate([
+    ['start_time' => '2026-06-15 06:00:00', 'subtype' => 'formula', 'amount_ml' => 60, 'meta_json' => '{}'],
+    ['start_time' => '2026-06-15 08:30:00', 'subtype' => 'breast_bottle', 'amount_ml' => 60, 'meta_json' => '{}'],
+    ['start_time' => '2026-06-15 11:00:00', 'subtype' => 'formula', 'amount_ml' => 60, 'meta_json' => '{}'],
+    ['start_time' => '2026-06-15 13:30:00', 'subtype' => 'formula', 'amount_ml' => 30, 'meta_json' => '{}'],
+], new DateTimeImmutable('2026-06-15 13:35:00'));
+assertSameValue(-45, $smallerBottle['volume_adjustment_minutes'], 'Cữ ít ml hơn trung bình kéo cữ kế tiếp gần hơn có giới hạn');
+assertSameValue('2026-06-15 15:15:00', $smallerBottle['predicted_time'], 'Dự đoán gần hơn khi bé bú ít hơn thường lệ');
+
 $withoutPump = FeedingPredictionService::calculate([
-    ['start_time' => '2026-06-15 06:00:00', 'subtype' => 'formula', 'meta_json' => '{}'],
-    ['start_time' => '2026-06-15 07:00:00', 'subtype' => 'pump', 'meta_json' => '{}'],
-    ['start_time' => '2026-06-15 09:00:00', 'subtype' => 'formula', 'meta_json' => '{}'],
+    ['start_time' => '2026-06-15 06:00:00', 'subtype' => 'formula', 'amount_ml' => 60, 'meta_json' => '{}'],
+    ['start_time' => '2026-06-15 07:00:00', 'subtype' => 'pump', 'amount_ml' => 80, 'meta_json' => '{}'],
+    ['start_time' => '2026-06-15 09:00:00', 'subtype' => 'formula', 'amount_ml' => 60, 'meta_json' => '{}'],
 ], new DateTimeImmutable('2026-06-15 09:05:00'));
 assertSameValue(180, $withoutPump['average_interval_minutes'], 'Hút sữa không được tính là cữ bé bú');
 
 $tooLittleData = FeedingPredictionService::calculate([
-    ['start_time' => '2026-06-15 06:00:00', 'subtype' => 'formula', 'meta_json' => '{}'],
+    ['start_time' => '2026-06-15 06:00:00', 'subtype' => 'formula', 'amount_ml' => 60, 'meta_json' => '{}'],
 ], new DateTimeImmutable('2026-06-15 06:05:00'));
 assertSameValue(null, $tooLittleData, 'Một cữ chưa đủ để dự đoán');
 assertSameValue(['a@example.com', 'b@example.com'], FeedingReminderSettings::emails('a@example.com, b@example.com; a@example.com'), 'Chuẩn hóa danh sách email');

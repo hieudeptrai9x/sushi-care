@@ -416,4 +416,19 @@ input[type="datetime-local"]::-webkit-date-and-time-value{text-align:left}
 @keyframes homeV4Float{0%,100%{transform:translate3d(0,0,0) scale(1)}50%{transform:translate3d(5px,-8px,0) scale(1.15)}}@keyframes homeV4Robot{0%,100%{transform:translateY(0) rotate(-1deg)}50%{transform:translateY(-5px) rotate(1deg)}}
 @media(max-width:370px){.home-v4-stats{gap:4px}.home-v4-stat{padding-left:1px;padding-right:1px}.home-v4-feature-grid{grid-template-columns:1fr}.home-v4-feature{min-height:170px}.home-v4-chart-grid{grid-template-columns:1fr 1fr}.home-v4-chart-card.rhythm-card{grid-column:1/-1}.home-v4-profile{grid-template-columns:60px minmax(0,1fr) 43px}.home-v4-avatar{width:60px;height:60px}}
 @media(min-width:431px){.home-v4-body,.home-v4-hero{padding-left:18px;padding-right:18px}}
+@media(min-width:900px){
+  body{
+    background:
+      radial-gradient(circle at 12% 16%,rgba(255,95,143,.10),transparent 24%),
+      radial-gradient(circle at 86% 18%,rgba(139,104,220,.10),transparent 20%),
+      linear-gradient(180deg,#fbf7f9 0,#f3edf0 100%);
+  }
+  .app-frame,.login-page,.startup{max-width:960px}
+  .app-frame{box-shadow:0 24px 80px rgba(70,38,51,.12)}
+  .bottom-nav{width:min(960px,100%)}
+  .page-pad{padding-left:28px;padding-right:28px}
+  .home-body{gap:22px}
+  .stats-grid{grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+  .timeline-card{padding-left:20px;padding-right:20px}
+}
 @media(prefers-reduced-motion:reduce){.home-v4 *{scroll-behavior:auto!important}.home-v4-glow,.home-v4-ai-orb{animation:none!important}.home-v4-feature,.home-v4-stat{transition:none!important}}
