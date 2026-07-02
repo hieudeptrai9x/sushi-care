@@ -161,8 +161,7 @@ export function HomePage() {
           <span className="home-v4-source">{prediction?.recent_average_interval_minutes ? `Khoảng cách TB giữa các cữ bú ${compactDuration(prediction.recent_average_interval_minutes)}` : 'Chưa đủ dữ liệu cữ bú'} <Info /></span>
         </article>
         <button className="home-v4-feature ai-feature" onClick={() => navigate('/ai')}>
-          <div className="home-v4-feature-title"><span>Sushi AI</span><Sparkles /></div>
-          <div className="home-v4-ai-orb"><Bot /></div>
+          <div className="home-v4-feature-title"><span>Sushi AI</span><i className="home-v4-ai-orb"><Bot /></i></div>
           <p>Hỏi nhanh về bú, ngủ, tã và sức khỏe của bé.</p>
           <span className="home-v4-ai-button">Chat ngay <ChevronRight /></span>
         </button>
