@@ -32,19 +32,19 @@ describe('local date and time fields', () => {
 })
 
 describe('feedingGuidance', () => {
-  it('tính lượng bú bình theo cân nặng từ hướng dẫn Việt Nam', () => {
+  it('ưu tiên lượng bú theo tuổi khi có hoặc không có cân nặng', () => {
     expect(feedingGuidance('2026-06-09', new Date('2026-06-14T12:00:00'), 2.7)).toMatchObject({
-      bottleAmount: 'khoảng 34–51 ml/cữ',
-      dailyAmount: 'khoảng 405 ml/24 giờ',
+      bottleAmount: 'khoảng 30 ml/cữ',
+      dailyAmount: '8–12 cữ/24 giờ',
       breastfeedingCadence: '8–12 cữ/24 giờ',
-      source: 'BV Từ Dũ · BV Nhi Đồng 1',
+      source: 'Vinmec · Medlatec · Pharmacity · Long Châu',
     })
   })
 
-  it('không đưa ra ml cá nhân hóa khi chưa có cân nặng', () => {
-    expect(feedingGuidance('2026-06-09', new Date('2026-06-14T12:00:00'))).toMatchObject({
-      bottleAmount: 'Cần cân nặng hiện tại',
-      dailyAmount: 'Ghi cân nặng để tính theo 150 ml/kg/24 giờ',
+  it('gợi ý 60-90 ml/cữ cho bé từ 2 tuần đến dưới 1 tháng', () => {
+    expect(feedingGuidance('2026-06-09', new Date('2026-07-02T12:00:00'))).toMatchObject({
+      bottleAmount: 'khoảng 60–90 ml/cữ',
+      dailyAmount: '8–12 cữ/24 giờ',
     })
   })
 })

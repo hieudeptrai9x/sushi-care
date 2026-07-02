@@ -148,11 +148,11 @@ export function HomePage() {
           <div className="home-v4-feature-title"><span>Gợi ý cữ bú tiếp theo</span><ChevronRight /></div>
           <div className="home-v4-feed-main">
             <span className="home-v4-bottle"><Milk /></span>
-            <div><small>Theo cân nặng hiện tại</small><strong>{milkGuide?.bottleAmount.replace('khoảng ', '') ?? '-- ml/cữ'}</strong>
+            <div><small>Theo tuổi hiện tại</small><strong>{milkGuide?.bottleAmount.replace('khoảng ', '') ?? '-- ml/cữ'}</strong>
               <span className="home-v4-next-feed"><Clock3 /> Cữ tiếp theo khoảng <b>{timeLabel(prediction?.predicted_time)}</b></span>
             </div>
           </div>
-          <span className="home-v4-source">Công thức theo cân nặng · BV Từ Dũ <Info /></span>
+          <span className="home-v4-source">Bảng tuổi tham khảo · Vinmec/Medlatec <Info /></span>
         </button>
         <button className="home-v4-feature ai-feature" onClick={() => navigate('/ai')}>
           <div className="home-v4-feature-title"><span>Sushi AI</span><Sparkles /></div>

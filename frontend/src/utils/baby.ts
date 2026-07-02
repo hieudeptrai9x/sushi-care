@@ -28,27 +28,31 @@ export function feedingGuidance(birthDate: string, now = new Date(), weightKg?: 
   const birth = new Date(`${birthDate}T00:00:00`)
   const days = Math.max(0, Math.floor((startOfDay(now).getTime() - birth.getTime()) / DAY))
   const breastfeedingCadence = days < 45 ? '8–12 cữ/24 giờ' : 'theo nhu cầu của bé'
-  if (weightKg && weightKg > 0) {
-    const daily = Math.round(weightKg * 150)
-    const lowPerFeed = Math.round(daily / 12)
-    const highPerFeed = Math.round(daily / 8)
-    return {
-      bottleAmount: `khoảng ${lowPerFeed}–${highPerFeed} ml/cữ`,
-      dailyAmount: `khoảng ${daily} ml/24 giờ`,
-      bottleCadence: 'nếu chia 8–12 cữ/ngày',
-      breastfeedingCadence,
-      note: 'Ước tính theo cân nặng hiện tại; theo tín hiệu đói/no, tã ướt và tăng cân, không ép bé bú hết.',
-      source: 'BV Từ Dũ · BV Nhi Đồng 1',
-    }
-  }
+  const rule = milkByAge(days)
   return {
-    bottleAmount: 'Cần cân nặng hiện tại',
-    dailyAmount: 'Ghi cân nặng để tính theo 150 ml/kg/24 giờ',
-    bottleCadence: 'theo nhu cầu của bé',
+    bottleAmount: rule.amount,
+    dailyAmount: rule.daily,
+    bottleCadence: rule.cadence,
     breastfeedingCadence,
-    note: 'Không dùng bảng tuổi cứng khi chưa có cân nặng để cá thể hóa.',
-    source: 'BV Từ Dũ · BV Nhi Đồng 1',
+    note: weightKg && weightKg > 0
+      ? `Ưu tiên theo tuổi; cân nặng ${weightKg} kg chỉ để tham khảo thêm. Theo tín hiệu đói/no, tã ướt và tăng cân, không ép bé bú hết.`
+      : 'Ưu tiên theo tuổi vì cân nặng tại nhà có thể không chính xác. Theo tín hiệu đói/no, tã ướt và tăng cân, không ép bé bú hết.',
+    source: 'Vinmec · Medlatec · Pharmacity · Long Châu',
   }
+}
+
+function milkByAge(days: number): { amount: string; daily: string; cadence: string } {
+  if (days <= 0) return { amount: 'khoảng 5–7 ml/cữ', daily: '8–12 cữ/24 giờ', cadence: 'ngày đầu sau sinh' }
+  if (days === 1) return { amount: 'khoảng 14 ml/cữ', daily: '8–12 cữ/24 giờ', cadence: 'ngày thứ 2' }
+  if (days === 2) return { amount: 'khoảng 22–27 ml/cữ', daily: '8–12 cữ/24 giờ', cadence: 'ngày thứ 3' }
+  if (days >= 3 && days <= 5) return { amount: 'khoảng 30 ml/cữ', daily: '8–12 cữ/24 giờ', cadence: 'ngày 4–6' }
+  if (days === 6) return { amount: 'khoảng 35 ml/cữ', daily: '8–12 cữ/24 giờ', cadence: 'ngày thứ 7' }
+  if (days >= 7 && days < 14) return { amount: 'khoảng 45–60 ml/cữ', daily: '8–12 cữ/24 giờ', cadence: 'mỗi 2–3 giờ hoặc theo nhu cầu' }
+  if (days >= 14 && days < 30) return { amount: 'khoảng 60–90 ml/cữ', daily: '8–12 cữ/24 giờ', cadence: 'mỗi 2–3 giờ hoặc theo nhu cầu' }
+  if (days < 60) return { amount: 'khoảng 60–120 ml/cữ', daily: '6–10 cữ/24 giờ', cadence: 'mỗi 2–3 giờ hoặc theo nhu cầu' }
+  if (days < 90) return { amount: 'khoảng 90–120 ml/cữ', daily: '6–10 cữ/24 giờ', cadence: 'mỗi 2–3 giờ hoặc theo nhu cầu' }
+  if (days < 180) return { amount: 'khoảng 90–150 ml/cữ', daily: '5–9 cữ/24 giờ', cadence: 'mỗi 3 giờ hoặc theo nhu cầu' }
+  return { amount: 'khoảng 120–180 ml/cữ', daily: 'theo nhu cầu và ăn dặm', cadence: 'mỗi 3–4 giờ hoặc theo nhu cầu' }
 }
 
 function startOfDay(date: Date): Date {
