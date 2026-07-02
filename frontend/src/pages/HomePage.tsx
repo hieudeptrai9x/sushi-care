@@ -160,10 +160,9 @@ export function HomePage() {
               <small>Cữ bú tiếp theo</small>
               <strong>{timeLabel(prediction?.predicted_time)}</strong>
               <em>{milkGuide?.bottleAmount.replace('khoảng ', '') ?? '-- ml/cữ'}</em>
-              <span className="home-v4-next-feed"><Clock3 /> TB {prediction?.recent_average_interval_minutes ? compactDuration(prediction.recent_average_interval_minutes) : '--'}</span>
             </div>
+            <span className="home-v4-next-feed"><Clock3 /> TB {prediction?.recent_average_interval_minutes ? compactDuration(prediction.recent_average_interval_minutes) : '--'}</span>
           </div>
-          <span className="home-v4-source">{prediction?.recent_average_interval_minutes ? `Khoảng cách TB giữa các cữ bú ${compactDuration(prediction.recent_average_interval_minutes)}` : 'Chưa đủ dữ liệu cữ bú'} <Info /></span>
         </article>
         <button className="home-v4-feature ai-feature" onClick={() => navigate('/ai')}>
           <span className="home-v4-ai-orb"><Bot /></span>
