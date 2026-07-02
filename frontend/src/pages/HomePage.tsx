@@ -69,7 +69,7 @@ export function HomePage() {
   const load = () => Promise.all([
     api.get<Baby>('/api/baby/get.php'),
     api.get<TodayStats>(`/api/stats/today.php?date=${today}`),
-    api.get<Activity[]>(`/api/activities/list.php?date=${today}&type=all`),
+    api.get<Activity[]>('/api/activities/list.php?recent=1&limit=5&type=all'),
     api.get<Reminder[]>('/api/reminders/list.php'),
     api.get<WeeklyStat[]>('/api/stats/weekly.php').catch(() => []),
     api.get<PredictionResponse>('/api/feeding/prediction.php').catch(() => null),
@@ -175,7 +175,7 @@ export function HomePage() {
       </section>
 
       <section className="home-v4-section">
-        <div className="home-v4-section-heading"><h2>Dòng thời gian hôm nay</h2><button onClick={() => navigate('/journal')}>Xem tất cả</button></div>
+        <div className="home-v4-section-heading"><h2>Dòng thời gian</h2><button onClick={() => navigate('/journal')}>Xem tất cả</button></div>
         <div className="home-v4-timeline card timeline-card">
           {activities.length ? activities.slice(0, 5).map((activity) =>
             <ActivityCard
@@ -185,7 +185,7 @@ export function HomePage() {
               onStop={stop}
               onComplete={(item) => navigate(`/add/${item.type}?activity=${item.id}`)}
             />
-          ) : <p className="soft-copy">Chưa có hoạt động hôm nay. Chạm một thẻ phía trên để bắt đầu.</p>}
+          ) : <p className="soft-copy">Chưa có hoạt động gần đây. Chạm một thẻ phía trên để bắt đầu.</p>}
         </div>
       </section>
 
