@@ -56,10 +56,16 @@ export function ActivityCard({ activity, onDelete, onEdit, onStop, onComplete, o
   const [, tick] = useState(0)
   const [actionsOpen, setActionsOpen] = useState(false)
   useEffect(() => {
-    if (status !== 'running') return
     const timer = window.setInterval(() => tick((value) => value + 1), 30_000)
-    return () => window.clearInterval(timer)
-  }, [status])
+    const refreshOnVisible = () => {
+      if (document.visibilityState === 'visible') tick((value) => value + 1)
+    }
+    document.addEventListener('visibilitychange', refreshOnVisible)
+    return () => {
+      window.clearInterval(timer)
+      document.removeEventListener('visibilitychange', refreshOnVisible)
+    }
+  }, [])
   const liveMinutes = status === 'running' ? Math.max(0, Math.floor((Date.now() - date.getTime()) / 60_000)) : activity.duration_minutes
   const doneAt = finishDate(activity)
   const titleText = status === 'running' ? runningLabel(activity) : `${title(activity)}${status === 'paused' ? ' · Chờ hoàn tất' : ''}`
