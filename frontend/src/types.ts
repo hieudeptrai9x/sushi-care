@@ -23,6 +23,8 @@ export type Baby = {
 export type FeedingPrediction = {
   predicted_time: string
   average_interval_minutes: number
+  recent_average_interval_minutes?: number
+  recent_average_sample_size?: number
   confidence: number
   last_feeding_time: string
   sample_size: number

@@ -46,6 +46,13 @@ const timeLabel = (value?: string) => value
   ? new Date(value.replace(' ', 'T')).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })
   : '--:--'
 
+const compactDuration = (minutes?: number) => {
+  if (!minutes || minutes <= 0) return ''
+  const hours = Math.floor(minutes / 60)
+  const rest = minutes % 60
+  return hours ? `${hours}h${rest ? `${rest}p` : ''}` : `${rest}p`
+}
+
 export function HomePage() {
   const navigate = useNavigate()
   const location = useLocation()
@@ -145,14 +152,13 @@ export function HomePage() {
     <main className="home-v4-body">
       <section className="home-v4-feature-grid">
         <article className="home-v4-feature feed-feature">
-          <div className="home-v4-feature-title"><span>Gợi ý cữ bú tiếp theo</span></div>
           <div className="home-v4-feed-main">
             <span className="home-v4-bottle"><Milk /></span>
             <div><small>Theo tuổi hiện tại</small><strong>{milkGuide?.bottleAmount.replace('khoảng ', '') ?? '-- ml/cữ'}</strong>
               <span className="home-v4-next-feed"><Clock3 /> Cữ tiếp theo khoảng <b>{timeLabel(prediction?.predicted_time)}</b></span>
             </div>
           </div>
-          <span className="home-v4-source">Bảng tuổi tham khảo · Vinmec/Medlatec <Info /></span>
+          <span className="home-v4-source">{prediction?.recent_average_interval_minutes ? `Khoảng cách TB giữa các cữ bú ${compactDuration(prediction.recent_average_interval_minutes)}` : 'Chưa đủ dữ liệu cữ bú'} <Info /></span>
         </article>
         <button className="home-v4-feature ai-feature" onClick={() => navigate('/ai')}>
           <div className="home-v4-feature-title"><span>Sushi AI</span><Sparkles /></div>

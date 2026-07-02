@@ -51,6 +51,8 @@ final class FeedingPredictionService
         if ($intervals === []) {
             return null;
         }
+        $recentIntervals = array_slice(array_column($intervals, 'minutes'), -15);
+        $recentAverage = (int) round(array_sum($recentIntervals) / max(1, count($recentIntervals)));
 
         $lastFeeding = end($feedings);
         $segment = self::segment($lastFeeding);
@@ -82,6 +84,8 @@ final class FeedingPredictionService
         return [
             'predicted_time' => date('Y-m-d H:i:s', $lastFeeding + ($average * 60)),
             'average_interval_minutes' => $average,
+            'recent_average_interval_minutes' => $recentAverage,
+            'recent_average_sample_size' => count($recentIntervals),
             'confidence' => $confidence,
             'last_feeding_time' => date('Y-m-d H:i:s', $lastFeeding),
             'sample_size' => count($selected) + 1,

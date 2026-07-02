@@ -111,6 +111,8 @@ $prediction = FeedingPredictionService::calculate([
 ], new DateTimeImmutable('2026-06-15 08:30:00'));
 assertSameValue('2026-06-15 11:08:00', $prediction['predicted_time'], 'Dự đoán cữ bú kế tiếp theo khoảng cách có trọng số');
 assertSameValue(163, $prediction['average_interval_minutes'], 'Khoảng cách trung bình có trọng số');
+assertSameValue(163, $prediction['recent_average_interval_minutes'], 'Khoảng cách trung bình các cữ gần nhất');
+assertSameValue(3, $prediction['recent_average_sample_size'], 'Số khoảng cách gần nhất được dùng');
 assertSameValue(true, $prediction['confidence'] >= 60, 'Độ tin cậy đủ dùng khi có bốn cữ');
 
 $withoutPump = FeedingPredictionService::calculate([
@@ -119,6 +121,13 @@ $withoutPump = FeedingPredictionService::calculate([
     ['start_time' => '2026-06-15 09:00:00', 'subtype' => 'formula', 'meta_json' => '{}'],
 ], new DateTimeImmutable('2026-06-15 09:05:00'));
 assertSameValue(180, $withoutPump['average_interval_minutes'], 'Hút sữa không được tính là cữ bé bú');
+
+$manyIntervals = [];
+for ($index = 0; $index < 18; $index++) {
+    $manyIntervals[] = ['start_time' => date('Y-m-d H:i:s', strtotime("2026-06-15 00:00:00 +{$index} hours")), 'subtype' => 'formula', 'meta_json' => '{}'];
+}
+$recentOnly = FeedingPredictionService::calculate($manyIntervals, new DateTimeImmutable('2026-06-15 18:05:00'));
+assertSameValue(15, $recentOnly['recent_average_sample_size'], 'Chỉ lấy tối đa 15 khoảng cách gần nhất');
 
 $tooLittleData = FeedingPredictionService::calculate([
     ['start_time' => '2026-06-15 06:00:00', 'subtype' => 'formula', 'meta_json' => '{}'],
