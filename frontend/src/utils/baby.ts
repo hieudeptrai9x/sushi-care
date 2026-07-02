@@ -3,7 +3,7 @@ const DAY = 86_400_000
 export function calculateAge(birthDate: string, now = new Date()): string {
   const birth = new Date(`${birthDate}T00:00:00`)
   const days = Math.max(0, Math.floor((startOfDay(now).getTime() - birth.getTime()) / DAY))
-  if (days < 30) return `${days} ngày tuổi · Tuần ${Math.floor(days / 7) + 1}`
+  if (days < 30) return `${days} ngày tuổi · ${Math.floor(days / 7)}w${days % 7}d`
 
   let months = (now.getFullYear() - birth.getFullYear()) * 12 + now.getMonth() - birth.getMonth()
   let anchor = new Date(birth.getFullYear(), birth.getMonth() + months, birth.getDate())

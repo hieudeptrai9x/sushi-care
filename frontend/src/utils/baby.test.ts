@@ -3,8 +3,9 @@ import { calculateAge, combineLocalInput, durationMinutes, feedingGuidance, form
 import { parseLocaleDecimal } from './number'
 
 describe('calculateAge', () => {
-  it('hiển thị ngày tuổi và tuần trong tháng đầu', () => {
-    expect(calculateAge('2026-06-01', new Date('2026-06-14T12:00:00'))).toBe('13 ngày tuổi · Tuần 2')
+  it('hiển thị ngày tuổi và tuổi theo tuần/ngày trong tháng đầu', () => {
+    expect(calculateAge('2026-06-01', new Date('2026-06-14T12:00:00'))).toBe('13 ngày tuổi · 1w6d')
+    expect(calculateAge('2026-06-09', new Date('2026-07-02T12:00:00'))).toBe('23 ngày tuổi · 3w2d')
   })
 
   it('hiển thị tháng và ngày từ ngày thứ 30', () => {
