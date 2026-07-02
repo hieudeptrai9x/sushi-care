@@ -152,18 +152,26 @@ export function HomePage() {
     <main className="home-v4-body">
       <section className="home-v4-feature-grid">
         <article className="home-v4-feature feed-feature">
+          <i className="home-v4-card-sparkle one">✦</i>
+          <i className="home-v4-card-sparkle two">♥</i>
           <div className="home-v4-feed-main">
             <span className="home-v4-bottle"><Milk /></span>
-            <div><small>Theo tuổi hiện tại</small><strong>{milkGuide?.bottleAmount.replace('khoảng ', '') ?? '-- ml/cữ'}</strong>
-              <span className="home-v4-next-feed"><Clock3 /> Cữ tiếp theo khoảng <b>{timeLabel(prediction?.predicted_time)}</b></span>
+            <div>
+              <small>Cữ bú tiếp theo</small>
+              <strong>{timeLabel(prediction?.predicted_time)}</strong>
+              <em>{milkGuide?.bottleAmount.replace('khoảng ', '') ?? '-- ml/cữ'}</em>
+              <span className="home-v4-next-feed"><Clock3 /> TB {prediction?.recent_average_interval_minutes ? compactDuration(prediction.recent_average_interval_minutes) : '--'}</span>
             </div>
           </div>
           <span className="home-v4-source">{prediction?.recent_average_interval_minutes ? `Khoảng cách TB giữa các cữ bú ${compactDuration(prediction.recent_average_interval_minutes)}` : 'Chưa đủ dữ liệu cữ bú'} <Info /></span>
         </article>
         <button className="home-v4-feature ai-feature" onClick={() => navigate('/ai')}>
-          <div className="home-v4-feature-title"><span>Sushi AI</span><i className="home-v4-ai-orb"><Bot /></i></div>
-          <p>Hỏi nhanh về bú, ngủ, tã và sức khỏe của bé.</p>
-          <span className="home-v4-ai-button">Chat ngay <ChevronRight /></span>
+          <span className="home-v4-ai-orb"><Bot /></span>
+          <div className="home-v4-ai-copy">
+            <strong>Sushi AI</strong>
+            <p>Hỏi nhanh về bú, ngủ, tã</p>
+            <span className="home-v4-ai-button">Hỏi AI <ChevronRight /></span>
+          </div>
         </button>
       </section>
 
